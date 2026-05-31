@@ -35,7 +35,7 @@ export class DebtService {
 
     // Step 2: Get AR and Debt Revenue accounts (must exist)
     const accountsCheck = await client.query(
-      `SELECT id, code, type FROM accounts WHERE tenant_id = $1 AND code IN ('1100', '4100')`,
+      `SELECT id, type FROM accounts WHERE tenant_id = $1 AND code IN ('1100', '4100')`,
       [request.tenantId]
     );
 
@@ -50,24 +50,23 @@ export class DebtService {
     // Step 3: Create debt record
     const debtId = uuid() as DebtId;
     const now = new Date();
-    const postingDate = new Date(now.toISOString().split('T')[0]); // Remove time component
 
     await client.query(
       `INSERT INTO debts (id, tenant_id, customer_id, principal, currency, status, originated_date, due_date, created_by, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [debtId, request.tenantId, request.customerId, request.principal, request.currency, 'ACTIVE', postingDate, request.dueDate, request.createdBy, now]
+      [debtId, request.tenantId, request.customerId, request.principal, request.currency, 'ACTIVE', now, request.dueDate, request.createdBy, now]
     );
 
     // Step 4: Post to Ledger
     const journalData: JournalEntryData = {
       tenantId: request.tenantId,
       description: `Debt created for customer ${request.customerId}`,
-      postingDate: postingDate,
+      postingDate: now,
       createdBy: request.createdBy,
       lines: [
         {
           accountId: arAccountId,
-          debitAmount: request.principal, // Debit AR (asset account)
+          debitAmount: request.principal, // Debit AR
           creditAmount: 0n,
           currency: request.currency,
           description: `Customer A/R - Debt ${debtId}`,
@@ -75,7 +74,7 @@ export class DebtService {
         {
           accountId: debtRevenueAccountId,
           debitAmount: 0n,
-          creditAmount: request.principal, // Credit Revenue (income account)
+          creditAmount: request.principal, // Credit Revenue
           currency: request.currency,
           description: `Debt Revenue - Debt ${debtId}`,
         },

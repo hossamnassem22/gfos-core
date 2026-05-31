@@ -10,7 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src --ext .ts 2>/dev/null || true",
+    "lint": "eslint src --ext .ts",
     "db:migrate": "ts-node src/infrastructure/database/migrations.ts"
   },
   "dependencies": {

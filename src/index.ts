@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 async function bootstrap() {
   try {
     console.log('🔧 GFOS Core - Phase 0: Foundation');
-    console.log('='.repeat(50));
+    console.log('=' * 50);
 
     // Run migrations
     console.log('\n📊 Setting up database schema...');

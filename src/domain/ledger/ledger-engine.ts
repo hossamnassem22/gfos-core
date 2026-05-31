@@ -1,6 +1,6 @@
 import { PoolClient } from 'pg';
 import { v4 as uuid } from 'uuid';
-import { Money, TenantId, UserId, EntryStatus, JournalEntryId, AccountType } from '../../shared/types';
+import { Money, TenantId, UserId, EntryStatus, DebtId, JournalEntryId } from '../../shared/types';
 
 export interface JournalLine {
   accountId: string;
@@ -110,7 +110,7 @@ export class LedgerEngine {
     );
 
     const { total_debits, total_credits } = result.rows[0];
-    const balanced = (total_debits || 0n) === (total_credits || 0n);
+    const balanced = total_debits === total_credits;
 
     if (!balanced) {
       console.warn(`⚠️ LEDGER IMBALANCE DETECTED for tenant ${tenantId}`);
@@ -123,10 +123,6 @@ export class LedgerEngine {
   /**
    * GET Account Balance (Derived from Ledger, not stored)
    * This is read-only, calculated from posted entries
-   * 
-   * FIXED: Now accounts for account type
-   * ASSET/EXPENSE: debit = increase (debit - credit)
-   * LIABILITY/EQUITY/INCOME: credit = increase (credit - debit)
    */
   static async getAccountBalance(
     client: PoolClient,
@@ -134,43 +130,23 @@ export class LedgerEngine {
     accountId: string,
     asOfDate?: Date
   ): Promise<Money> {
-    const dateFilter = asOfDate ? `AND je.posting_date <= $4` : '';
+    const query = asOfDate
+      ? `SELECT 
+          COALESCE(SUM(debit_amount), 0) - COALESCE(SUM(credit_amount), 0) as balance
+         FROM journal_lines jl
+         JOIN journal_entries je ON jl.journal_entry_id = je.id
+         WHERE je.tenant_id = $1 AND jl.account_id = $2 AND je.status = $3 AND je.posting_date <= $4`
+      : `SELECT 
+          COALESCE(SUM(debit_amount), 0) - COALESCE(SUM(credit_amount), 0) as balance
+         FROM journal_lines jl
+         JOIN journal_entries je ON jl.journal_entry_id = je.id
+         WHERE je.tenant_id = $1 AND jl.account_id = $2 AND je.status = $3`;
+
     const params = asOfDate
       ? [tenantId, accountId, EntryStatus.POSTED, asOfDate]
       : [tenantId, accountId, EntryStatus.POSTED];
 
-    const query = `
-      SELECT 
-        a.type,
-        COALESCE(SUM(jl.debit_amount), 0) as total_debits,
-        COALESCE(SUM(jl.credit_amount), 0) as total_credits
-      FROM journal_lines jl
-      JOIN journal_entries je ON jl.journal_entry_id = je.id
-      JOIN accounts a ON jl.account_id = a.id
-      WHERE je.tenant_id = $1 AND jl.account_id = $2 AND je.status = $3 ${dateFilter}
-      GROUP BY a.type
-    `;
-
     const result = await client.query(query, params);
-    
-    if (result.rows.length === 0) {
-      return 0n;
-    }
-
-    const { type, total_debits, total_credits } = result.rows[0];
-    
-    // Calculate balance based on account type
-    let balance: bigint;
-    if (type === 'ASSET' || type === 'EXPENSE') {
-      // Debit increases these accounts
-      balance = BigInt(total_debits) - BigInt(total_credits);
-    } else if (type === 'LIABILITY' || type === 'EQUITY' || type === 'INCOME') {
-      // Credit increases these accounts
-      balance = BigInt(total_credits) - BigInt(total_debits);
-    } else {
-      balance = 0n;
-    }
-
-    return balance;
+    return BigInt(result.rows[0].balance || 0);
   }
 }

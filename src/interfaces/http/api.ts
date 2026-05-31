@@ -112,7 +112,7 @@ app.get('/ledger/balance', async (req: Request, res: Response) => {
     res.json({
       success: true,
       balanced,
-      message: balanced ? '✅ Ledger is perfectly balanced' : '❌ Ledger is IMBALANCED - CRITICAL',
+      message: balanced ? 'Ledger is perfectly balanced' : 'Ledger is IMBALANCED - CRITICAL',
     });
   } catch (error: any) {
     console.error('Error checking ledger balance:', error);
