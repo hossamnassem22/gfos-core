@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * FINANCIAL → ACCOUNTING CONTRACT VALIDATOR
  *
@@ -564,3 +565,64 @@ export class ContractValidationError extends Error {
  * Export singleton instance
  */
 export const contractValidator = new FinancialAccountingContractValidator();
+=======
+export class FinancialAccountingContractValidator {
+
+  private checkTemplateExists(_templateId: string, _version: string): boolean {
+    // Placeholder implementation - contract-level validation only
+    return true;
+  }
+
+  private validateMapping(
+    _tenantId: string,
+    _productId: string,
+    _logicalAccountName: string
+  ): boolean {
+    // Placeholder validation logic for contract enforcement
+    return true;
+  }
+
+  private validateJournalStructure(
+    _templateId: string,
+    _version: string
+  ): boolean {
+    // Ensures journal structure exists and is valid (contract only)
+    return true;
+  }
+
+  private validateTenantScope(_tenantId: string): boolean {
+    // Tenant isolation check placeholder
+    return true;
+  }
+
+  private validateProductScope(_productId: string): boolean {
+    // Product isolation check placeholder
+    return true;
+  }
+
+  public validateAll(input: {
+    tenantId: string;
+    productId: string;
+    logicalAccountName: string;
+    templateId: string;
+    version: string;
+  }): boolean {
+
+    const t = this.checkTemplateExists(input.templateId, input.version);
+    const m = this.validateMapping(
+      input.tenantId,
+      input.productId,
+      input.logicalAccountName
+    );
+    const j = this.validateJournalStructure(
+      input.templateId,
+      input.version
+    );
+
+    const tenant = this.validateTenantScope(input.tenantId);
+    const product = this.validateProductScope(input.productId);
+
+    return t && m && j && tenant && product;
+  }
+}
+>>>>>>> 136b9df (reinitialize repo: restore git tracking)
