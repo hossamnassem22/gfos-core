@@ -78,7 +78,7 @@
     "ts-node": "^10.9.2",
     "type-is": "^2.1.0",
     "typescript": "^6.0.3",
-    "undici-types": "^7.24.6",
+    "undici-types": "^8.3.0",
     "unpipe": "^1.0.0",
     "v8-compile-cache-lib": "^3.0.1",
     "vary": "^1.1.2",
