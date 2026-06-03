@@ -17,7 +17,7 @@
     "call-bind-apply-helpers": "^1.0.2",
     "call-bound": "^1.0.4",
     "content-disposition": "^1.1.0",
-    "content-type": "^1.0.5",
+    "content-type": "^2.0.0",
     "cookie": "^0.7.2",
     "cookie-signature": "^1.2.2",
     "create-require": "^1.1.1",
