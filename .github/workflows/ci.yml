@@ -1,0 +1,14 @@
+name: CI Quality Check
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Lint Code
+        run: deno lint
+      - name: Audit Dependencies
+        run: deno task audit

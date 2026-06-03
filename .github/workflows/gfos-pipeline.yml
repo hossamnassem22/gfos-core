@@ -1,0 +1,12 @@
+name: GFOS Financial Pipeline
+on: [push]
+jobs:
+  financial-integrity-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run test:unit
+      - run: npm run test:stress
+      - name: Verify Financial Invariants
+        run: npm run check:invariants
