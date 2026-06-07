@@ -1,16 +1,12 @@
-// ... الكود السابق ...
-module.exports = { EntryType };
 export enum EntryType {
-  DEBIT = 'DEBIT',
-  CREDIT = 'CREDIT'
+  DEBIT = "DEBIT",
+  CREDIT = "CREDIT"
 }
 
-export interface LedgerLine {
-  accountId: string;
-  amount: bigint;
-  type: EntryType;
-  description: string;
+export class LedgerLine {
+  constructor(
+    public readonly account: string,
+    public readonly type: EntryType,
+    public readonly amount: number
+  ) {}
 }
-
-// ... الكود السابق ...
-module.exports = { EntryType };

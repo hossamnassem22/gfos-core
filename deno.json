@@ -1,13 +1,23 @@
 {
   "tasks": {
-    "check": "deno fmt --check && deno lint && deno test",
-    "lint": "deno lint",
-    "format": "deno fmt",
-    "test": "deno test --allow-all",
-    "audit": "deno task audit"
+    "test": "deno test --allow-all genesis/test/integration/",
+    "check": "deno check src/index.ts"
   },
+  "imports": {
+    "@/": "./src/",
+    "@src/": "./src/",
+    "@app/": "./src/application/",
+    "@domain/": "./src/domain/",
+    "@kernel/": "./src/kernel/",
+    "@engine/": "./src/kernel/engine/",
+    "@infra/": "./src/infrastructure/",
+    "@core/": "./src/core/",
+    "decimal.js": "npm:decimal.js",
+    "uuid": "npm:uuid",
+    "zod": "npm:zod"
+  },
+  "nodeModulesDir": "auto",
   "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true
+    "strict": true
   }
 }

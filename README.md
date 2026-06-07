@@ -1,28 +1,54 @@
-# GFOS - Core Financial Operating System
+# Selfni Core
 
-نظام تشغيل مالي أساسي (Core Financial System) مصمم للالتزام التام بالمعايير البرمجية والمالية.
+نظام ادارة الديون والائتمان - Deno/TypeScript + PostgreSQL
 
-## الهيكل التنظيمي (Project Structure)
-- `src/core/`: النواة والمنطق المحاسبي.
-- `src/application/`: خدمات التطبيق والمحركات (Engines).
-- `src/infrastructure/`: الطبقة التحتية (قواعد البيانات، الاتصال).
-- `src/domain/`: الكيانات المشتركة والمنطق الرياضي.
-- `src/verification/`: أدوات التحقق وتدقيق العمليات.
-- `src/interfaces/`: واجهات التعامل الخارجية (API).
+## التشغيل
+- start.sh — تشغيل PostgreSQL + API
+- stop.sh  — ايقاف كل شيء
 
-## معايير الجودة والتطوير
-يتم فحص المشروع تلقائياً باستخدام:
-1. **Deno Lint**: للتأكد من نظافة الكود.
-2. **CodeQL**: للفحص الأمني العميق.
-3. **Dependabot**: لتحديث المكتبات دورياً.
+## API
 
-## أوامر التشغيل (Tasks)
-يمكنك استخدام الأوامر التالية من خلال `deno task`:
-- `check`: لفحص جودة الكود بالكامل (Lint, Format, Test).
-- `test`: لتشغيل كافة الاختبارات المتاحة.
-- `audit`: لفحص الثغرات الأمنية في المكتبات.
+### Auth
+- POST /auth/register
+- POST /auth/login
 
-## قواعد المساهمة
-- يمنع استخدام `any` في أي ملف.
-- يجب معالجة الأخطاء باستخدام `unknown` والتحقق من النوع `instanceof Error`.
-- المتغيرات المهملة تبدأ بـ `_`.
+### Customers
+- POST /customers
+- GET  /customers
+- GET  /customers/:id
+
+### Debts
+- POST /debts
+- GET  /debts/user/:userId
+
+### Payments
+- POST /payments
+
+### Dashboard
+- GET  /dashboard/installments
+- GET  /dashboard/overdue
+- GET  /dashboard/overdue-summary
+- POST /dashboard/run-overdue
+
+### Statement
+- GET  /statement/:userId
+
+### Calculate
+- POST /calculate/interest
+- POST /calculate/waterfall
+
+## الجداول
+- users, customers, debt_agreements
+- amortization_schedule, payments
+- financial_events, ledger_entries
+
+## Views
+- dashboard_installments
+- view_overdue_report
+- dashboard_overdue_summary
+
+## Scheduler
+يشتغل كل يوم 00:05 — PENDING -> OVERDUE -> InstallmentOverdue event
+
+## انواع السداد
+- FLAT_RATE, DECLINING_BALANCE, BALLOON

@@ -1,4 +1,4 @@
-import { CanonicalEvent } from "./CanonicalEvent";
+import { CanonicalEvent } from "./CanonicalEvent.ts";
 export class CanonicalComparator {
   static compare(a: CanonicalEvent, b: CanonicalEvent): number {
     if (a.sequenceHint < b.sequenceHint) return -1;

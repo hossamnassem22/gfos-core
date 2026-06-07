@@ -1,17 +1,20 @@
-import fc from 'fast-check';
-import { OrderingRules } from '../../../packages/algebra/src/causality/Ordering';
-import { eventArb } from '../generators';
+import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+import * as fc from "npm:fast-check";
+// تصحيح المسار: نخرج 4 مستويات للوصول للجذر حيث يوجد الكود
+import { CanonicalComparator } from "../../../../CanonicalComparator.ts";
 
-describe('Deterministic Linearization', () => {
-  it('should produce the same linear order regardless of input permutation', () => {
-    fc.assert(
-      fc.property(fc.array(eventArb), (events) => {
-        const sorted1 = [...events].sort(OrderingRules.compare);
-        const shuffled = [...events].reverse();
-        const sorted2 = shuffled.sort(OrderingRules.compare);
-        
-        return JSON.stringify(sorted1) === JSON.stringify(sorted2);
-      })
-    );
-  });
+Deno.test("Certification: Deterministic Ordering Contract", async () => {
+  await fc.assert(
+    fc.asyncProperty(fc.array(fc.record({
+      id: fc.string(),
+      hash: fc.string(),
+      sequenceHint: fc.integer()
+    })), (events) => {
+      // الترتيب باستخدام المقارن القانوني (Canonical)
+      const sorted1 = [...events].sort(CanonicalComparator.compare);
+      const sorted2 = [...events].reverse().sort(CanonicalComparator.compare);
+      
+      assertEquals(sorted1, sorted2, "فشل الحتمية: الترتيب تغير بتغير ترتيب المدخلات!");
+    })
+  );
 });

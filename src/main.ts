@@ -1,23 +1,23 @@
-import { EventBus } from "./domain/events/EventBus";
-import { EventStore } from "./infrastructure/event-store/EventStore";
-import { TransactionEngine } from "./application/transactions/TransactionEngine";
-import { ProcessPayment } from "./application/use-cases/ProcessPayment";
-import { DebtEventHandler } from "./application/handlers/DebtEventHandler";
+import { PriceFeedService } from "./infrastructure/services/PriceFeedService.ts";
+import { AuditLogger } from "./infrastructure/audit/AuditLogger.ts";
 
-const eventBus = new EventBus();
-const eventStore = new EventStore();
+async function main() {
+  console.log("=== بدء تشغيل GFOS-Core Engine ===");
+  
+  // 1. توثيق بدء النظام
+  await AuditLogger.log("SYSTEM", "STARTUP", "تم تشغيل المحرك المالي بنجاح.");
 
-// register handlers
-eventBus.register("PaymentProcessed", new DebtEventHandler());
-eventBus.register("LedgerEntryRecorded", new DebtEventHandler());
+  // 2. تفعيل محاكي أسعار الصرف (كل 15 ثانية)
+  setInterval(async () => {
+    try {
+      await PriceFeedService.updateRates();
+    } catch (error) {
+      console.error("[ERROR]: فشل تحديث الأسعار:", error);
+    }
+  }, 15000);
 
-const engine = new TransactionEngine(eventBus, eventStore);
-const processPayment = new ProcessPayment(engine);
+  // 3. هنا يمكن إضافة استماع للطلبات (API Listener) مستقبلاً
+  console.log("النظام يعمل الآن في الخلفية...");
+}
 
-// TEST RUN
-processPayment.execute({
-  tenantId: "t1",
-  paymentId: "p1",
-  debtId: "d1",
-  amount: 1000
-});
+main().catch(console.error);

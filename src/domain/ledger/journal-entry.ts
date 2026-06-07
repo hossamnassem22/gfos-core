@@ -1,27 +1,18 @@
-import { LedgerLine, EntryType } from './ledger-line';
+import { Money } from "@domain/ledger/Money.ts";
+
+export enum EntryType {
+  DEBIT = "DEBIT",
+  CREDIT = "CREDIT"
+}
 
 export class JournalEntry {
   constructor(
-    public readonly id: string,
-    public readonly lines: LedgerLine[],
-    public readonly timestamp: Date = new Date()
-  ) {
-    this.validateBalance();
-  }
+    public readonly account: string,
+    public readonly type: EntryType,
+    public readonly amount: Money
+  ) {}
 
-  private validateBalance(): void {
-    const totalDebit = this.lines
-      .filter(l => l.type === EntryType.DEBIT)
-      .reduce((sum, l) => sum + l.amount, 0n);
-
-    const totalCredit = this.lines
-      .filter(l => l.type === EntryType.CREDIT)
-      .reduce((sum, l) => sum + l.amount, 0n);
-
-    if (totalDebit !== totalCredit) {
-      throw new Error('Financial Invariant Violated: Debits must equal Credits');
-    }
+  static create(account: string, type: EntryType, amount: Money): JournalEntry {
+    return new JournalEntry(account, type, amount);
   }
 }
-
-node tests/domain/ledger/run-test.js

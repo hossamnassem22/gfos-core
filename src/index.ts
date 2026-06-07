@@ -1,36 +1,35 @@
-import { app } from './interfaces/http/api';
-import { runMigrations } from './infrastructure/database/migrations';
-import * as dotenv from 'dotenv';
+import express from 'express';
+import { CommandContextManager } from './context/CommandContext';
+import { InMemoryEventStore } from './infrastructure/InMemoryEventStore';
+import { InventoryProjection } from './projections/InventoryProjection';
+import { DebtProjection } from './projections/DebtProjection';
+import { SaleService } from './services/SaleService';
 
-dotenv.config();
+// 1. تهيئة النظام (Dependency Injection)
+const eventStore = new InMemoryEventStore();
+const inventory = new InventoryProjection();
+const debt = new DebtProjection();
+const saleService = new SaleService(eventStore, inventory, debt);
 
-const PORT = process.env.PORT || 3000;
+const app = express();
+app.use(express.json());
 
-async function bootstrap() {
+// 2. حارس البوابة (Security Middleware)
+app.use((req, res, next) => {
+  const tenantId = req.headers['x-tenant-id'] as string;
+  if (!tenantId) return res.status(401).json({ error: "TENANT_ID_REQUIRED" });
+  CommandContextManager.run({ tenantId, requestId: 'req-' + Date.now() }, () => next());
+});
+
+// 3. مسار البيع (The Sales Pipeline)
+app.post('/api/sales', async (req, res) => {
+  const { productId, quantity, price, customerId, isCredit } = req.body;
   try {
-    console.log('🔧 GFOS Core - Phase 0: Foundation');
-    console.log('=' * 50);
-
-    // Run migrations
-    console.log('\n📊 Setting up database schema...');
-    await runMigrations();
-
-    // Start server
-    app.listen(PORT, () => {
-      console.log(`\n🚀 API Server running on port ${PORT}`);
-      console.log(`\n📝 Test with:`);
-      console.log(`   curl -X POST http://localhost:${PORT}/debts \\`);
-      console.log(`     -H 'x-tenant-id: your-tenant-id' \\`);
-      console.log(`     -H 'Content-Type: application/json' \\`);
-      console.log(`     -d '{"customerId": "customer-id", "principal": 100000}'`);
-      console.log(`\n💡 Check ledger balance:`);
-      console.log(`   curl http://localhost:${PORT}/ledger/balance \\`);
-      console.log(`     -H 'x-tenant-id: your-tenant-id'`);
-    });
-  } catch (error) {
-    console.error('❌ Bootstrap failed:', error);
-    process.exit(1);
+    const saleId = await saleService.recordSale({ productId, quantity, price }, customerId, isCredit);
+    res.status(201).json({ status: "Success", saleId });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
-}
+});
 
-bootstrap();
+app.listen(3000, () => console.log('Commercial OS is LIVE on port 3000 🚀'));

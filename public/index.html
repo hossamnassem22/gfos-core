@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>سجل عملية بيع</h2>
+  <form id="saleForm">
+    <input type="text" id="productId" placeholder="اسم المنتج" required><br>
+    <input type="number" id="quantity" placeholder="الكمية" required><br>
+    <input type="number" id="price" placeholder="السعر" required><br>
+    <button type="submit">إتمام البيع</button>
+  </form>
+
+  <script>
+    document.getElementById('saleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        productId: document.getElementById('productId').value,
+        quantity: parseInt(document.getElementById('quantity').value),
+        price: parseFloat(document.getElementById('price').value)
+      };
+
+      const res = await fetch('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-tenant-id': 'my-shop-id' },
+        body: JSON.stringify(data)
+      });
+      alert('تمت العملية بنجاح');
+    });
+  </script>
+</body>
+</html>

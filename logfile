@@ -1,0 +1,93 @@
+2026-06-04 12:01:21.211 EET [18616] LOG:  starting PostgreSQL 18.2 on aarch64-unknown-linux-android, compiled by Android (13989888, +pgo, +bolt, +lto, +mlgo, based on r563880c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f06077099aa41290cdb4c5e6fa0f59349), 64-bit
+2026-06-04 12:01:21.213 EET [18616] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-06-04 12:01:21.216 EET [18616] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-06-04 12:01:21.291 EET [18624] LOG:  database system was interrupted; last known up at 2026-06-04 11:56:50 EET
+2026-06-04 12:01:22.530 EET [18624] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-06-04 12:01:22.536 EET [18624] LOG:  redo starts at 0/1BE2210
+2026-06-04 12:01:22.537 EET [18624] LOG:  invalid record length at 0/1BE2350: expected at least 24, got 0
+2026-06-04 12:01:22.537 EET [18624] LOG:  redo done at 0/1BE2318 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-06-04 12:01:22.549 EET [18622] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-06-04 12:01:22.566 EET [18622] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.003 s, total=0.019 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/1BE2350, redo lsn=0/1BE2350
+2026-06-04 12:01:22.572 EET [18616] LOG:  database system is ready to accept connections
+2026-06-04 12:06:22.685 EET [18622] LOG:  checkpoint starting: time
+2026-06-04 12:06:24.946 EET [19735] FATAL:  role "postgres" does not exist
+2026-06-04 12:06:32.833 EET [18622] LOG:  checkpoint complete: wrote 67 buffers (0.4%), wrote 1 SLRU buffers; 1 WAL file(s) added, 0 removed, 0 recycled; write=6.829 s, sync=0.780 s, total=10.154 s; sync files=59, longest=0.082 s, average=0.014 s; distance=371 kB, estimate=371 kB; lsn=0/1C3F080, redo lsn=0/1C3EFF0
+2026-06-04 12:11:22.931 EET [18622] LOG:  checkpoint starting: time
+2026-06-04 12:11:23.568 EET [18622] LOG:  checkpoint complete: wrote 6 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.609 s, sync=0.008 s, total=0.638 s; sync files=5, longest=0.002 s, average=0.002 s; distance=6 kB, estimate=334 kB; lsn=0/1C40888, redo lsn=0/1C40830
+2026-06-04 12:34:45.524 EET [22934] LOG:  PID 16304 in cancel request did not match any process
+2026-06-04 12:36:23.006 EET [18622] LOG:  checkpoint starting: time
+2026-06-04 12:36:24.075 EET [18622] LOG:  checkpoint complete: wrote 10 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.020 s, sync=0.017 s, total=1.069 s; sync files=8, longest=0.005 s, average=0.003 s; distance=12 kB, estimate=302 kB; lsn=0/1C43B88, redo lsn=0/1C43B30
+2026-06-04 12:41:23.175 EET [18622] LOG:  checkpoint starting: time
+2026-06-04 12:41:27.390 EET [18622] LOG:  checkpoint complete: wrote 41 buffers (0.3%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=4.149 s, sync=0.044 s, total=4.215 s; sync files=41, longest=0.003 s, average=0.002 s; distance=164 kB, estimate=288 kB; lsn=0/1C6E5C0, redo lsn=0/1C6CCB0
+2026-06-04 12:51:23.591 EET [18622] LOG:  checkpoint starting: time
+2026-06-04 12:51:25.248 EET [18622] LOG:  checkpoint complete: wrote 16 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.617 s, sync=0.020 s, total=1.658 s; sync files=13, longest=0.003 s, average=0.002 s; distance=39 kB, estimate=263 kB; lsn=0/1C769A8, redo lsn=0/1C76950
+2026-06-04 23:19:11.100 EET [11400] ERROR:  duplicate key value violates unique constraint "users_username_key"
+2026-06-04 23:19:11.100 EET [11400] DETAIL:  Key (username)=(حسام) already exists.
+2026-06-04 23:19:11.100 EET [11400] STATEMENT:  
+	      INSERT INTO users (username, email, password_hash)
+	      VALUES ($1, $2, $3)
+	      RETURNING id, username
+	    
+2026-06-04 23:21:53.130 EET [11731] ERROR:  duplicate key value violates unique constraint "users_username_key"
+2026-06-04 23:21:53.130 EET [11731] DETAIL:  Key (username)=(حسام) already exists.
+2026-06-04 23:21:53.130 EET [11731] STATEMENT:  
+	      INSERT INTO users (username, email, password_hash)
+	      VALUES ($1, $2, $3)
+	      RETURNING id, username
+	    
+2026-06-04 23:23:13.760 EET [18622] LOG:  checkpoint starting: time
+2026-06-04 23:23:14.011 EET [18622] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.213 s, sync=0.006 s, total=0.252 s; sync files=3, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=237 kB; lsn=0/1C76E60, redo lsn=0/1C76E08
+2026-06-05 07:09:02.588 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 07:09:03.148 EET [18622] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.521 s, sync=0.008 s, total=0.562 s; sync files=6, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=213 kB; lsn=0/1C77560, redo lsn=0/1C77508
+2026-06-05 07:19:43.126 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 07:19:43.660 EET [18622] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.508 s, sync=0.007 s, total=0.534 s; sync files=6, longest=0.002 s, average=0.002 s; distance=2 kB, estimate=192 kB; lsn=0/1C77DA8, redo lsn=0/1C77D50
+2026-06-05 07:24:43.695 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 07:24:44.007 EET [18622] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.212 s, sync=0.006 s, total=0.313 s; sync files=3, longest=0.004 s, average=0.002 s; distance=1 kB, estimate=173 kB; lsn=0/1C78400, redo lsn=0/1C783A8
+2026-06-05 07:29:43.022 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 07:29:43.253 EET [18622] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.208 s, sync=0.004 s, total=0.231 s; sync files=3, longest=0.002 s, average=0.002 s; distance=2 kB, estimate=156 kB; lsn=0/1C78D78, redo lsn=0/1C78D20
+2026-06-05 07:29:50.195 EET [7316] ERROR:  update or delete on table "debt_agreements" violates foreign key constraint "amortization_schedule_debt_id_fkey" on table "amortization_schedule"
+2026-06-05 07:29:50.195 EET [7316] DETAIL:  Key (id)=(8ada5b25-86ef-4876-88bd-90a4f1d0e340) is still referenced from table "amortization_schedule".
+2026-06-05 07:29:50.195 EET [7316] STATEMENT:  DELETE FROM debt_agreements
+2026-06-05 07:34:43.297 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 07:34:44.469 EET [18622] LOG:  checkpoint complete: wrote 11 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.130 s, sync=0.014 s, total=1.173 s; sync files=20, longest=0.003 s, average=0.001 s; distance=60 kB, estimate=146 kB; lsn=0/1C87DA8, redo lsn=0/1C87D50
+2026-06-05 09:38:15.431 EET [13591] ERROR:  there is no unique or exclusion constraint matching the ON CONFLICT specification
+2026-06-05 09:38:15.431 EET [13591] STATEMENT:  
+	        INSERT INTO customers (phone) 
+	        VALUES ($1) 
+	        ON CONFLICT (phone) DO UPDATE SET phone = EXCLUDED.phone 
+	        RETURNING id
+2026-06-05 09:39:45.357 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 09:39:55.928 EET [18622] LOG:  checkpoint complete: wrote 103 buffers (0.6%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=10.370 s, sync=0.173 s, total=10.571 s; sync files=98, longest=0.019 s, average=0.002 s; distance=575 kB, estimate=575 kB; lsn=0/1D17B10, redo lsn=0/1D17AB8
+2026-06-05 09:41:43.527 EET [13992] ERROR:  column "merchant_id" of relation "ledger_entries" does not exist at character 38
+2026-06-05 09:41:43.527 EET [13992] STATEMENT:  
+	        INSERT INTO ledger_entries (merchant_id, order_id, type, debit_account, credit_account, amount)
+	        VALUES ($1, $2, 'SALE', 'CASH_RECEIVABLE', 'SALES_REVENUE', $3)
+2026-06-05 09:43:01.238 EET [14088] ERROR:  column "order_id" of relation "ledger_entries" does not exist at character 51
+2026-06-05 09:43:01.238 EET [14088] STATEMENT:  
+	        INSERT INTO ledger_entries (merchant_id, order_id, type, debit_account, credit_account, amount)
+	        VALUES ($1, $2, 'SALE', 'CASH_RECEIVABLE', 'SALES_REVENUE', $3)
+2026-06-05 09:44:45.936 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 09:44:54.807 EET [18622] LOG:  checkpoint complete: wrote 87 buffers (0.5%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=8.801 s, sync=0.038 s, total=8.872 s; sync files=111, longest=0.002 s, average=0.001 s; distance=452 kB, estimate=563 kB; lsn=0/1D88E38, redo lsn=0/1D88DA8
+2026-06-05 09:49:45.908 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 09:49:50.086 EET [18622] LOG:  checkpoint complete: wrote 41 buffers (0.3%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=4.134 s, sync=0.027 s, total=4.178 s; sync files=32, longest=0.003 s, average=0.001 s; distance=151 kB, estimate=521 kB; lsn=0/1DAEB70, redo lsn=0/1DAEB18
+2026-06-05 09:51:11.574 EET [15181] ERROR:  relation "salesmen" does not exist
+2026-06-05 09:51:11.574 EET [15181] STATEMENT:  ALTER TABLE orders ADD COLUMN IF NOT EXISTS salesman_id UUID REFERENCES salesmen(id);
+2026-06-05 09:54:45.186 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 09:54:53.072 EET [18622] LOG:  checkpoint complete: wrote 77 buffers (0.5%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=7.799 s, sync=0.059 s, total=7.886 s; sync files=67, longest=0.002 s, average=0.001 s; distance=284 kB, estimate=498 kB; lsn=0/1DF5E40, redo lsn=0/1DF5DE8
+2026-06-05 09:59:45.172 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 09:59:49.695 EET [18622] LOG:  checkpoint complete: wrote 44 buffers (0.3%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=4.438 s, sync=0.032 s, total=4.524 s; sync files=64, longest=0.002 s, average=0.001 s; distance=169 kB, estimate=465 kB; lsn=0/1E20398, redo lsn=0/1E20340
+2026-06-05 10:04:45.752 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 10:04:51.299 EET [18622] LOG:  checkpoint complete: wrote 54 buffers (0.3%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=5.461 s, sync=0.042 s, total=5.547 s; sync files=65, longest=0.003 s, average=0.001 s; distance=225 kB, estimate=441 kB; lsn=0/1E58A20, redo lsn=0/1E589C8
+2026-06-05 10:27:56.938 EET [19335] ERROR:  insert or update on table "products" violates foreign key constraint "products_merchant_id_fkey"
+2026-06-05 10:27:56.938 EET [19335] DETAIL:  Key (merchant_id)=(550e8400-e29b-41d4-a716-446655440000) is not present in table "merchants".
+2026-06-05 10:27:56.938 EET [19335] STATEMENT:  
+	      INSERT INTO products (merchant_id, title, price, stock)
+	      VALUES ($1, $2, $3, $4)
+	      RETURNING id
+	    
+2026-06-05 10:29:45.748 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 10:29:46.324 EET [18622] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.517 s, sync=0.020 s, total=0.577 s; sync files=6, longest=0.010 s, average=0.004 s; distance=1 kB, estimate=397 kB; lsn=0/1E58FE0, redo lsn=0/1E58F88
+2026-06-05 10:34:45.424 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 10:34:45.980 EET [18622] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.509 s, sync=0.008 s, total=0.557 s; sync files=6, longest=0.003 s, average=0.002 s; distance=1 kB, estimate=357 kB; lsn=0/1E59768, redo lsn=0/1E59710
+2026-06-05 10:39:46.080 EET [18622] LOG:  checkpoint starting: time
+2026-06-05 10:39:46.214 EET [18622] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.107 s, sync=0.002 s, total=0.135 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=322 kB; lsn=0/1E59A28, redo lsn=0/1E599D0

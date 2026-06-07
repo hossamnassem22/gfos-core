@@ -1,11 +1,14 @@
 export class Money {
-  constructor(public readonly amount: bigint) {
-    if (amount < 0n) throw new Error("DR-003: NEGATIVE_MONEY_NOT_ALLOWED");
+  constructor(
+    public readonly cents: bigint,
+    public readonly currency: string = "EGP"
+  ) {}
+
+  get currencyCode(): string {
+    return this.currency;
   }
-  static from(amount: number | bigint): Money {
-    return new Money(BigInt(amount));
-  }
-  add(other: Money): Money {
-    return new Money(this.amount + other.amount);
+
+  static fromCents(cents: bigint, currency: string = "EGP"): Money {
+    return new Money(cents, currency);
   }
 }
