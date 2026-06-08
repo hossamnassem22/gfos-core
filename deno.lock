@@ -16,20 +16,15 @@
     "npm:@fastify/cors@^11.2.0": "11.2.0",
     "npm:bcryptjs@*": "3.0.3",
     "npm:bcryptjs@^3.0.3": "3.0.3",
-    "npm:decimal.js@*": "10.6.0",
-    "npm:decimal.js@^10.6.0": "10.6.0",
     "npm:express@*": "5.2.1",
     "npm:fast-check@latest": "4.8.0",
     "npm:fastify@*": "5.8.5",
     "npm:fastify@^5.8.5": "5.8.5",
     "npm:jsonwebtoken@*": "9.0.3",
     "npm:jsonwebtoken@^9.0.3": "9.0.3",
+    "npm:nodemailer@*": "8.0.10",
     "npm:postgres@*": "3.4.9",
-    "npm:postgres@^3.4.9": "3.4.9",
-    "npm:uuid@*": "14.0.0",
-    "npm:uuid@14": "14.0.0",
-    "npm:zod@*": "4.4.3",
-    "npm:zod@^4.4.3": "4.4.3"
+    "npm:postgres@^3.4.9": "3.4.9"
   },
   "jsr": {
     "@std/cli@1.0.30": {
@@ -547,6 +542,9 @@
     "negotiator@1.0.0": {
       "integrity": "sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg=="
     },
+    "nodemailer@8.0.10": {
+      "integrity": "sha512-BLFuSth7QtHOkBzyqTehWWyub0NTRDuK2Q2SQfnGLsrJnzyU+Yeh4WpV1eZGuARFj1xQJHIdnTuJZLP+b9R1GQ=="
+    },
     "object-inspect@1.13.4": {
       "integrity": "sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew=="
     },
@@ -846,9 +844,7 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:decimal.js@*",
-      "npm:uuid@*",
-      "npm:zod@*"
+      "jsr:@std/assert@1.0.0"
     ],
     "packageJson": {
       "dependencies": [

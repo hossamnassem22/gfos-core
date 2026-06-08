@@ -1,4 +1,5 @@
 import { OverdueEngine } from "@app/services/OverdueEngine.ts";
+import { NotificationEngine } from "@app/services/NotificationEngine.ts";
 
 function msUntil(hour: number, minute: number): number {
   const now = new Date();
@@ -10,10 +11,12 @@ function msUntil(hour: number, minute: number): number {
 
 export function startOverdueScheduler() {
   async function run() {
-    console.log(`[Scheduler] Running OverdueEngine at ${new Date().toISOString()}`);
+    console.log(`[Scheduler] Running at ${new Date().toISOString()}`);
     try {
-      const result = await OverdueEngine.process({ dryRun: false });
-      console.log(`[Scheduler] Done:`, result);
+      const overdueResult = await OverdueEngine.process({ dryRun: false });
+      console.log(`[Scheduler] OverdueEngine:`, overdueResult);
+      const notifResult = await NotificationEngine.process();
+      console.log(`[Scheduler] Notifications: created=${notifResult.created} skipped=${notifResult.skipped}`);
     } catch (err) {
       console.error(`[Scheduler] Error:`, err);
     }

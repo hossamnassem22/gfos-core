@@ -1,23 +1,14 @@
 {
-  "tasks": {
-    "test": "deno test --allow-all genesis/test/integration/",
-    "check": "deno check src/index.ts"
-  },
   "imports": {
-    "@/": "./src/",
-    "@src/": "./src/",
-    "@app/": "./src/application/",
     "@domain/": "./src/domain/",
-    "@kernel/": "./src/kernel/",
-    "@engine/": "./src/kernel/engine/",
-    "@infra/": "./src/infrastructure/",
     "@core/": "./src/core/",
-    "decimal.js": "npm:decimal.js",
-    "uuid": "npm:uuid",
-    "zod": "npm:zod"
+    "@infra/": "./src/infrastructure/",
+    "@app/": "./src/application/",
+    "@std/assert": "jsr:@std/assert@1.0.0"
   },
-  "nodeModulesDir": "auto",
-  "compilerOptions": {
-    "strict": true
+  "test": {
+    "include": [
+      "genesis/test/unit/*.test.ts"
+    ]
   }
 }

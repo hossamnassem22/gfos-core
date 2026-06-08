@@ -45,4 +45,15 @@ export async function customerRoutes(app: FastifyInstance) {
     `;
     return { customer, debts };
   });
-}
+// Portfolio summary لكل عملاء الـ tenant
+  app.get("/customers/portfolio", { preHandler: requireAuth }, async (req, reply) => {
+    const { userId } = (req as any).user;
+    const rows = await sql`
+      SELECT * FROM customer_portfolio_summary
+      WHERE tenant_id = ${userId}
+      ORDER BY overdue_amount_cents DESC, total_principal_cents DESC
+    `;
+    return rows;
+  });}
+
+	
