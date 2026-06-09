@@ -7,9 +7,6 @@ const jsonReplacer = (_key: string, value: any) =>
 
 export class JournalRepository {
   async save(entry: JournalEntry): Promise<void> {
-    if (!isAllowed) {
-      throw new Error("Financial period is closed");
-    }
 
     const linesJson = JSON.stringify(entry.lines, jsonReplacer);
 
