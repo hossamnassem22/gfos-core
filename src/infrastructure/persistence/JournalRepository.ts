@@ -1,15 +1,12 @@
 import { sql } from "@infra/database/connection.ts";
 import { JournalEntry, TrialBalanceRow, AccountCode } from "@core/ledger/types.ts";
-import { FinancialPeriodService } from "@domain/ledger/FinancialPeriodService.ts";
 
-const periodService = new FinancialPeriodService();
 
 const jsonReplacer = (_key: string, value: any) => 
   typeof value === 'bigint' ? value.toString() : value;
 
 export class JournalRepository {
   async save(entry: JournalEntry): Promise<void> {
-    const isAllowed = await periodService.canPostToDate(entry.tenantId, entry.createdAt);
     if (!isAllowed) {
       throw new Error("Financial period is closed");
     }
