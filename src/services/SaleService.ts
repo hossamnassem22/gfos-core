@@ -1,42 +1,25 @@
-import { EventFactory } from '../core/EventFactory';
-import { SaleRecorded } from '../events/SaleEvents';
-import { DebtIssued } from '../events/DebtEvents';
-import { RecordSaleCommand } from '../commands/SaleCommands';
-import { IEventStore } from '../infrastructure/EventStore';
-import { InventoryProjection } from '../projections/InventoryProjection';
-import { DebtProjection } from '../projections/DebtProjection';
+import { EventFactory } from "../core/EventFactory.ts";
+import { CreateSaleCommand } from "../commands/SaleCommands.ts";
+import { InventoryProjection } from "../projections/InventoryProjection.ts";
+import { DebtProjection } from "../projections/DebtProjection.ts";
 
 export class SaleService {
   constructor(
-    private eventStore: IEventStore,
+    private eventStore: any,
     private inventory: InventoryProjection,
     private debt: DebtProjection
   ) {}
 
-  async recordSale(command: RecordSaleCommand, customerId?: string, isCredit: boolean = false) {
-    // 1. تسجيل البيع
-    const saleEvent = EventFactory.create<SaleRecorded>({
-      type: "SaleRecorded",
-      productId: command.productId,
-      quantity: command.quantity,
-      price: command.price,
-      version: 1
-    });
-    await this.eventStore.append(saleEvent);
-    await this.inventory.handle(saleEvent);
-
-    // 2. تسجيل الدين (إذا كان بيعاً بالأجل)
-    if (isCredit && customerId) {
-      const debtEvent = EventFactory.create<DebtIssued>({
-        type: "DebtIssued",
-        customerId,
-        amount: command.price * command.quantity,
-        version: 1
-      });
-      await this.eventStore.append(debtEvent);
-      await this.debt.handle(debtEvent);
-    }
+  async processSale(command: CreateSaleCommand) {
+    console.log("Processing sale for item:", command.itemId);
     
-    return saleEvent.eventId;
+    // إنشاء حدث بناءً على الأمر
+    const event = EventFactory.createEvent("SALE_CREATED", command);
+    
+    // حفظ الحدث في الـ Store
+    await this.eventStore.save(event);
+    
+    console.log("Sale event persisted successfully.");
+    return event;
   }
 }

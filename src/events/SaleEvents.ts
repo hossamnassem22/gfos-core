@@ -1,8 +1,3 @@
-import { BaseEvent } from './BaseEvent';
-
-export interface SaleRecorded extends BaseEvent {
-  type: "SaleRecorded";
-  productId: string;
-  quantity: number;
-  price: number;
+export class SaleEvents {
+  static SALE_CREATED = "SALE_CREATED";
 }

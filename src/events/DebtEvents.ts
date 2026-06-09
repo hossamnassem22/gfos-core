@@ -1,7 +1,3 @@
-import { BaseEvent } from './BaseEvent';
-
-export interface DebtIssued extends BaseEvent {
-  type: "DebtIssued";
-  customerId: string;
-  amount: number;
+export class DebtEvents {
+  static DEBT_CREATED = "DEBT_CREATED";
 }

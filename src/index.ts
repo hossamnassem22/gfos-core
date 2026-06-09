@@ -1,35 +1,19 @@
-import express from 'express';
-import { CommandContextManager } from './context/CommandContext';
-import { InMemoryEventStore } from './infrastructure/InMemoryEventStore';
-import { InventoryProjection } from './projections/InventoryProjection';
-import { DebtProjection } from './projections/DebtProjection';
-import { SaleService } from './services/SaleService';
+import { CommandContext } from "./context/CommandContext.ts";
+import { InMemoryEventStore } from "./infrastructure/InMemoryEventStore.ts";
+import { InventoryProjection } from "./projections/InventoryProjection.ts";
+import { DebtProjection } from "./projections/DebtProjection.ts";
+import { SaleService } from "./services/SaleService.ts";
 
-// 1. تهيئة النظام (Dependency Injection)
-const eventStore = new InMemoryEventStore();
-const inventory = new InventoryProjection();
-const debt = new DebtProjection();
-const saleService = new SaleService(eventStore, inventory, debt);
+async function main() {
+  const eventStore = new InMemoryEventStore();
+  const saleService = new SaleService(new InMemoryEventStore(), new InventoryProjection(), new DebtProjection());
 
-const app = express();
-app.use(express.json());
+  // تجربة تنفيذ أمر بيع
+  await saleService.processSale({
+    itemId: "product-123",
+    quantity: 1,
+    price: 500
+  });
+}
 
-// 2. حارس البوابة (Security Middleware)
-app.use((req, res, next) => {
-  const tenantId = req.headers['x-tenant-id'] as string;
-  if (!tenantId) return res.status(401).json({ error: "TENANT_ID_REQUIRED" });
-  CommandContextManager.run({ tenantId, requestId: 'req-' + Date.now() }, () => next());
-});
-
-// 3. مسار البيع (The Sales Pipeline)
-app.post('/api/sales', async (req, res) => {
-  const { productId, quantity, price, customerId, isCredit } = req.body;
-  try {
-    const saleId = await saleService.recordSale({ productId, quantity, price }, customerId, isCredit);
-    res.status(201).json({ status: "Success", saleId });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.listen(3000, () => console.log('Commercial OS is LIVE on port 3000 🚀'));
+main();
