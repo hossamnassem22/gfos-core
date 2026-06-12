@@ -1,0 +1,39 @@
+name: 🚀 Simple Auto-Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  release:
+    name: 📦 Create Release
+    runs-on: ubuntu-latest
+    # ✅ إزالة الشرط if → يشغّل دائمًا عند tag v*
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: '1.40.4'
+
+      - name: 🏗️ Build
+        run: deno build --out=dist
+
+      - name: 📦 Get Tag Name
+        id: tag
+        run: echo "name=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      - name: 📦 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: Release ${{ steps.tag.outputs.name }}
+          body: |
+            ## 🚀 Release ${{ steps.tag.outputs.name }}
+            
+            Auto-generated release from GitHub Actions.
+          files: dist/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

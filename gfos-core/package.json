@@ -1,0 +1,16 @@
+{
+  "name": "gfos-core",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:ledger": "vitest run tests/ledger.test.ts",
+    "run:workflow": "ts-node src/phase3_workflow/run-workflow.ts",
+    "test:validation": "ts-node src/phase3_workflow/test-validation.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0",
+    "vitest": "^1.0.0"
+  }
+}
