@@ -10,25 +10,27 @@ jobs:
     name: 🏷️ Semantic Versioning
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      release-type: ${{ steps.version.outputs.release_type }}
+      version: ${{ steps.semantic.outputs.new_tag }}
+      release-type: ${{ steps.semantic.outputs.release_type }}
     steps:
       - name: ⚡ Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 🏷️ Calculate Version
-        id: version
-        uses: cycjim/semantic-release-action@v3
+      - name: 🏷️ Calculate Version (semantic-release)
+        id: semantic
+        uses: Manyel/semantic-release-action@v3
         with:
           tag_format: v%s
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     name: 📦 Create Release
     runs-on: ubuntu-latest
     needs: semantic-version
-    if: needs.semantic-version.outputs.release-type != 'none'
+    if: needs.semantic-version.outputs.release_type != 'none'
     steps:
       - name: ⚡ Checkout
         uses: actions/checkout@v4
@@ -52,11 +54,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Publish to npm
+        if: false  # قم بتفعيله إذا لديك npm package
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 📤 Publish to Deno
+        if: false  # قم بتفعيله إذا لديك Deno package
         run: deno publish
         env:
           DENO_AUTH_TOKEN: ${{ secrets.DENO_TOKEN }}
