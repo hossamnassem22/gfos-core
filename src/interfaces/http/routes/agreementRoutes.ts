@@ -1,10 +1,39 @@
-import { Router } from "npm:express";
-import { AgreementController } from "../controllers/AgreementController.ts";
-import { validateAgreement } from "../middleware/validateAgreement.ts";
+import type { FastifyInstance } from "npm:fastify";
 
-const router = Router();
+export async function agreementRoutes(app: FastifyInstance) {
+  app.get("/agreements", async () => {
+    return {
+      success: true,
+      data: [],
+      message: "Agreements fetched successfully",
+    };
+  });
 
-// مسار توثيق اتفاقية دين جديدة مع التحقق من صحة البيانات
-router.post("/agreements", validateAgreement, AgreementController.create);
+  app.post("/agreements", async (req) => {
+    const body = req.body as any;
 
-export default router;
+    return {
+      success: true,
+      message: "Agreement created successfully",
+      data: body,
+    };
+  });
+
+  app.get("/agreements/:id", async (req) => {
+    const { id } = req.params as any;
+
+    return {
+      success: true,
+      data: { id },
+    };
+  });
+
+  app.delete("/agreements/:id", async (req) => {
+    const { id } = req.params as any;
+
+    return {
+      success: true,
+      message: `Agreement ${id} deleted`,
+    };
+  });
+}
