@@ -1,14 +1,23 @@
 name: CI Quality Check
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v1
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
         with:
-          deno-version: v1.x
-      - name: Lint Code
-        run: deno lint
-      - name: Audit Dependencies
-        run: deno task audit
+          node-version: '24'
+
+      - name: Test
+        run: |
+          npm ci
+          npm test

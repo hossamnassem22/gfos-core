@@ -1,28 +1,13 @@
 name: 🚀 Quantum-Grade Deno Enterprise CI
 
-###############################################################################
-# ARCHITECTURE: Event-Driven Micro-Workflow Architecture (EDMW-A) v3.2
-# STANDARDS: ISO/IEC 25010, IEEE 12207, CMMI Level 5, GitOps 2.0, DevSecOps
-# FEATURES: AIOps, Chaos Engineering, Formal Verification, Property-Based Test
-###############################################################################
-
 on:
   push:
-    branches: 
-      - main
-      - 'release/**'
-      - 'hotfix/**'
-      - 'feature/**'
-    tags: 
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
-      - 'release-[0-9]+.[0-9]+.[0-9]+*'
+    branches: [ main, 'release/**', 'hotfix/**' ]
+    tags: [ 'v*', 'release-*' ]
   pull_request:
     branches: [ main ]
-    types: [ opened, reopened, ready_for_review, labeled ]
   schedule:
-    - cron: '0 0 * * 1'     # Weekly: Security + Compliance Audit
-    - cron: '0 6 * * 3'     # Bi-weekly: Performance Benchmark
-    - cron: '0 12 * * 5'    # Monthly: Chaos Engineering Test
+    - cron: '0 0 * * 1'
   workflow_dispatch:
     inputs:
       force-rebuild:
@@ -44,12 +29,8 @@ on:
 env:
   DENO_VERSION: '1.40.4'
   LATEST_DENO: '1.45.0'
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   CACHE_VERSION: 'v3'
-  REGISTRY: 'ghcr.io'
-  IMAGE_NAME: '${{ github.repository }}'
-  COVERAGE_THRESHOLD: 95
-  SECURITY_VULNERABILITY_MAX: 0
 
 jobs:
   pre-flight-gate:
