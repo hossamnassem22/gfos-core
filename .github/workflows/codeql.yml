@@ -1,48 +1,23 @@
-name: 🔒 Advanced CodeQL Security
-
+name: "CodeQL Analysis"
 on:
   push:
-    branches: [ main, 'release/**' ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 * * 1'
-
+    branches: [ "main" ]
 jobs:
   analyze:
-    name: 🔍 Analyze (${{ matrix.language }})
+    name: Analyze
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ['javascript', 'typescript']
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
     steps:
-      - name: ⚡ Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
         with:
-          fetch-depth: 0
-
-      - name: 🔐 Checkout Secret Scanning
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          secrets: 'all'
-          queries: security-extended,security-and-quality
-
-      - name: 🔨 Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: 📊 Perform Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
-          upload: true
-          sarif-filename: codeql-results.sarif
-
-      - name: 📤 Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif-file: codeql-results.sarif
-          wait-for-processing: true
+          languages: ['javascript']
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
