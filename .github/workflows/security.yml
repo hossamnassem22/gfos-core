@@ -1,0 +1,53 @@
+name: 🔐 Multi-Stage Security
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  secret-scan:
+    name: 🔑 Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔍 TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: '.'
+          output: results.json
+
+      - name: 📤 Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: secret-scan
+          path: results.json
+
+  vulnerability-scan:
+    name: 🛡️ Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔍 npm Audit
+        run: npm audit --audit-level=moderate
+
+      - name: 🔍 Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: '.'
+          format: json
+          output: trivy-results.json
+
+      - name: 📤 Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-scan
+          path: trivy-results.json

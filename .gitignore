@@ -1,14 +1,13 @@
+# Dependencies
 node_modules/
-dist/
+deno_dir/
+
+# Environment and Data
 .env
-.env.local
+backups/
+logs/
+postmaster.pid
+
+# System/IDE
 .DS_Store
-*.log
 .vscode/
-.idea/
-coverage/
-build/
-.turbo/
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
