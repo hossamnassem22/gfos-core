@@ -1,0 +1,1011 @@
+--
+-- PostgreSQL database dump
+--
+
+\restrict IJCvQGQV6Pf6rRbmdB5CSbHoFUL7E1V9yeSscRHNEgdIrap8qvzWMwuBX9pdjGF
+
+-- Dumped from database version 18.2
+-- Dumped by pg_dump version 18.2
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: amortization_schedule; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.amortization_schedule (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    debt_id uuid NOT NULL,
+    installment_number integer NOT NULL,
+    due_date date NOT NULL,
+    principal_cents bigint NOT NULL,
+    interest_cents bigint NOT NULL,
+    total_payment_cents bigint NOT NULL,
+    remaining_balance_cents bigint NOT NULL,
+    status text DEFAULT 'PENDING'::text NOT NULL,
+    paid_at timestamp with time zone
+);
+
+
+ALTER TABLE public.amortization_schedule OWNER TO u0_a202;
+
+--
+-- Name: debt_agreements; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.debt_agreements (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id text NOT NULL,
+    principal_cents bigint NOT NULL,
+    currency text DEFAULT 'EGP'::text NOT NULL,
+    annual_rate_bps integer NOT NULL,
+    term_months integer NOT NULL,
+    amort_type text DEFAULT 'DECLINING'::text NOT NULL,
+    status text DEFAULT 'ACTIVE'::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    customer_id uuid
+);
+
+
+ALTER TABLE public.debt_agreements OWNER TO u0_a202;
+
+--
+-- Name: analytics_cashflow_forecast; Type: VIEW; Schema: public; Owner: u0_a202
+--
+
+CREATE VIEW public.analytics_cashflow_forecast AS
+ SELECT s.due_date,
+    d.user_id AS tenant_id,
+    count(s.id) AS installment_count,
+    sum(s.total_payment_cents) AS expected_cents,
+    sum(s.principal_cents) AS principal_cents,
+    sum(s.interest_cents) AS interest_cents
+   FROM (public.amortization_schedule s
+     JOIN public.debt_agreements d ON ((d.id = s.debt_id)))
+  WHERE ((s.status = 'PENDING'::text) AND ((s.due_date >= CURRENT_DATE) AND (s.due_date <= (CURRENT_DATE + '90 days'::interval))))
+  GROUP BY s.due_date, d.user_id
+  ORDER BY s.due_date;
+
+
+ALTER VIEW public.analytics_cashflow_forecast OWNER TO u0_a202;
+
+--
+-- Name: payments; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.payments (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    debt_id uuid NOT NULL,
+    amount_cents bigint NOT NULL,
+    currency text DEFAULT 'EGP'::text NOT NULL,
+    penalties_paid bigint DEFAULT 0 NOT NULL,
+    interest_paid bigint DEFAULT 0 NOT NULL,
+    principal_paid bigint DEFAULT 0 NOT NULL,
+    remaining bigint DEFAULT 0 NOT NULL,
+    paid_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.payments OWNER TO u0_a202;
+
+--
+-- Name: analytics_monthly_collections; Type: VIEW; Schema: public; Owner: u0_a202
+--
+
+CREATE VIEW public.analytics_monthly_collections AS
+ SELECT date_trunc('month'::text, p.paid_at) AS month,
+    d.user_id AS tenant_id,
+    count(p.id) AS payment_count,
+    sum(p.amount_cents) AS total_collected_cents,
+    sum(p.principal_paid) AS principal_collected_cents,
+    sum(p.interest_paid) AS interest_collected_cents
+   FROM (public.payments p
+     JOIN public.debt_agreements d ON ((d.id = p.debt_id)))
+  GROUP BY (date_trunc('month'::text, p.paid_at)), d.user_id
+  ORDER BY (date_trunc('month'::text, p.paid_at)) DESC;
+
+
+ALTER VIEW public.analytics_monthly_collections OWNER TO u0_a202;
+
+--
+-- Name: analytics_portfolio_health; Type: VIEW; Schema: public; Owner: u0_a202
+--
+
+CREATE VIEW public.analytics_portfolio_health AS
+ SELECT d.user_id AS tenant_id,
+    count(DISTINCT d.id) AS total_debts,
+    count(DISTINCT d.id) FILTER (WHERE (d.status = 'ACTIVE'::text)) AS active_debts,
+    count(DISTINCT d.id) FILTER (WHERE (d.status = 'CLOSED'::text)) AS closed_debts,
+    count(DISTINCT d.id) FILTER (WHERE (d.status = 'RESTRUCTURED'::text)) AS restructured_debts,
+    sum(d.principal_cents) AS total_principal_cents,
+    count(s.id) FILTER (WHERE (s.status = 'OVERDUE'::text)) AS overdue_installments,
+    sum(s.total_payment_cents) FILTER (WHERE (s.status = 'OVERDUE'::text)) AS overdue_amount_cents,
+    count(s.id) FILTER (WHERE (s.status = 'PENDING'::text)) AS pending_installments,
+    count(s.id) FILTER (WHERE (s.status = 'PAID'::text)) AS paid_installments
+   FROM (public.debt_agreements d
+     LEFT JOIN public.amortization_schedule s ON ((s.debt_id = d.id)))
+  GROUP BY d.user_id;
+
+
+ALTER VIEW public.analytics_portfolio_health OWNER TO u0_a202;
+
+--
+-- Name: audit_logs; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.audit_logs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    entity_type character varying(50) NOT NULL,
+    entity_id character varying(50) NOT NULL,
+    action character varying(50) NOT NULL,
+    metadata jsonb,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.audit_logs OWNER TO u0_a202;
+
+--
+-- Name: customers; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.customers (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    phone text NOT NULL,
+    name text,
+    tenant_id text DEFAULT 'USER-001'::text NOT NULL,
+    national_id text,
+    email text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.customers OWNER TO u0_a202;
+
+--
+-- Name: customer_portfolio_summary; Type: VIEW; Schema: public; Owner: u0_a202
+--
+
+CREATE VIEW public.customer_portfolio_summary AS
+ SELECT c.id AS customer_id,
+    c.tenant_id,
+    c.name,
+    c.phone,
+    c.national_id,
+    c.created_at,
+    count(DISTINCT d.id) AS debt_count,
+    COALESCE(sum(d.principal_cents), (0)::numeric) AS total_principal_cents,
+    COALESCE(sum(s.remaining), (0)::numeric) AS remaining_balance_cents,
+    COALESCE(sum(s.overdue_amount), (0)::numeric) AS overdue_amount_cents,
+    COALESCE(sum(s.overdue_count), (0)::numeric) AS overdue_installments
+   FROM ((public.customers c
+     LEFT JOIN public.debt_agreements d ON ((d.customer_id = c.id)))
+     LEFT JOIN LATERAL ( SELECT sum(amortization_schedule.total_payment_cents) FILTER (WHERE (amortization_schedule.status = 'OVERDUE'::text)) AS overdue_amount,
+            count(*) FILTER (WHERE (amortization_schedule.status = 'OVERDUE'::text)) AS overdue_count,
+            sum(amortization_schedule.remaining_balance_cents) FILTER (WHERE ((amortization_schedule.status <> 'PAID'::text) AND (amortization_schedule.installment_number = ( SELECT max(amortization_schedule_1.installment_number) AS max
+                   FROM public.amortization_schedule amortization_schedule_1
+                  WHERE (amortization_schedule_1.debt_id = d.id))))) AS remaining
+           FROM public.amortization_schedule
+          WHERE (amortization_schedule.debt_id = d.id)) s ON (true))
+  GROUP BY c.id, c.tenant_id, c.name, c.phone, c.national_id, c.created_at;
+
+
+ALTER VIEW public.customer_portfolio_summary OWNER TO u0_a202;
+
+--
+-- Name: dashboard_installments; Type: VIEW; Schema: public; Owner: u0_a202
+--
+
+CREATE VIEW public.dashboard_installments AS
+ SELECT s.id AS installment_id,
+    d.user_id,
+    d.currency,
+    s.due_date,
+    s.total_payment_cents,
+    s.status,
+    (s.due_date - CURRENT_DATE) AS days_remaining,
+        CASE
+            WHEN (s.status = 'PAID'::text) THEN 'green'::text
+            WHEN (s.due_date < CURRENT_DATE) THEN 'red'::text
+            WHEN (s.due_date <= (CURRENT_DATE + '7 days'::interval)) THEN 'yellow'::text
+            ELSE 'green'::text
+        END AS color_code
+   FROM (public.amortization_schedule s
+     JOIN public.debt_agreements d ON ((s.debt_id = d.id)));
+
+
+ALTER VIEW public.dashboard_installments OWNER TO u0_a202;
+
+--
+-- Name: financial_events; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.financial_events (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    event_type character varying(50) NOT NULL,
+    payload jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.financial_events OWNER TO u0_a202;
+
+--
+-- Name: view_overdue_report; Type: VIEW; Schema: public; Owner: u0_a202
+--
+
+CREATE VIEW public.view_overdue_report AS
+ SELECT s.id AS installment_id,
+    s.installment_number,
+    s.due_date,
+    s.principal_cents,
+    s.interest_cents,
+    s.total_payment_cents,
+    s.remaining_balance_cents,
+    s.status,
+    d.user_id,
+    d.currency,
+    (CURRENT_DATE - s.due_date) AS days_late,
+    e.created_at AS event_recorded_at
+   FROM ((public.amortization_schedule s
+     JOIN public.debt_agreements d ON ((d.id = s.debt_id)))
+     JOIN public.financial_events e ON (((((((e.payload #>> '{}'::text[]))::jsonb ->> 'installmentId'::text))::uuid = s.id) AND ((e.event_type)::text = 'InstallmentOverdue'::text))))
+  WHERE (s.status = 'OVERDUE'::text);
+
+
+ALTER VIEW public.view_overdue_report OWNER TO u0_a202;
+
+--
+-- Name: dashboard_overdue_summary; Type: VIEW; Schema: public; Owner: u0_a202
+--
+
+CREATE VIEW public.dashboard_overdue_summary AS
+ SELECT count(*) AS overdue_count,
+    sum(total_payment_cents) AS overdue_amount_cents,
+    round(avg(days_late), 1) AS average_days_late,
+    max(days_late) AS max_days_late
+   FROM public.view_overdue_report;
+
+
+ALTER VIEW public.dashboard_overdue_summary OWNER TO u0_a202;
+
+--
+-- Name: financial_periods; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.financial_periods (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    tenant_id character varying(50) NOT NULL,
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    status character varying(10) DEFAULT 'OPEN'::character varying,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT financial_periods_status_check CHECK (((status)::text = ANY ((ARRAY['OPEN'::character varying, 'CLOSED'::character varying, 'LOCKED'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.financial_periods OWNER TO u0_a202;
+
+--
+-- Name: journal_entries; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.journal_entries (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    tenant_id text NOT NULL,
+    reference text NOT NULL,
+    description text NOT NULL,
+    currency text DEFAULT 'EGP'::text NOT NULL,
+    lines jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.journal_entries OWNER TO u0_a202;
+
+--
+-- Name: ledger_entries; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.ledger_entries (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    merchant_id uuid,
+    order_id uuid,
+    type text NOT NULL,
+    debit_account text NOT NULL,
+    credit_account text NOT NULL,
+    amount numeric(12,2) NOT NULL,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.ledger_entries OWNER TO u0_a202;
+
+--
+-- Name: merchants; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.merchants (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    phone text NOT NULL,
+    status text DEFAULT 'PENDING'::text,
+    plan text DEFAULT 'FREE'::text,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.merchants OWNER TO u0_a202;
+
+--
+-- Name: notification_queue; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.notification_queue (
+    id integer NOT NULL,
+    user_id uuid NOT NULL,
+    message text NOT NULL,
+    status character varying(20) DEFAULT 'PENDING'::character varying,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    retry_count integer DEFAULT 0,
+    locked_at timestamp with time zone
+);
+
+
+ALTER TABLE public.notification_queue OWNER TO u0_a202;
+
+--
+-- Name: notification_queue_id_seq; Type: SEQUENCE; Schema: public; Owner: u0_a202
+--
+
+CREATE SEQUENCE public.notification_queue_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.notification_queue_id_seq OWNER TO u0_a202;
+
+--
+-- Name: notification_queue_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: u0_a202
+--
+
+ALTER SEQUENCE public.notification_queue_id_seq OWNED BY public.notification_queue.id;
+
+
+--
+-- Name: notifications; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.notifications (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    tenant_id text NOT NULL,
+    customer_id uuid,
+    debt_id uuid,
+    type text NOT NULL,
+    title text NOT NULL,
+    body text NOT NULL,
+    is_read boolean DEFAULT false NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.notifications OWNER TO u0_a202;
+
+--
+-- Name: order_items; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.order_items (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    order_id uuid,
+    product_id uuid,
+    quantity integer NOT NULL,
+    price numeric(12,2) NOT NULL
+);
+
+
+ALTER TABLE public.order_items OWNER TO u0_a202;
+
+--
+-- Name: orders; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.orders (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    merchant_id uuid,
+    customer_id uuid,
+    total_amount numeric(12,2) NOT NULL,
+    status text DEFAULT 'PENDING'::text,
+    payment_method text,
+    created_at timestamp with time zone DEFAULT now(),
+    salesman_id uuid
+);
+
+
+ALTER TABLE public.orders OWNER TO u0_a202;
+
+--
+-- Name: products; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.products (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    merchant_id uuid,
+    title text NOT NULL,
+    description text,
+    price numeric(12,2) NOT NULL,
+    stock integer DEFAULT 0,
+    is_active boolean DEFAULT true,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.products OWNER TO u0_a202;
+
+--
+-- Name: salesmen; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.salesmen (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    merchant_id uuid,
+    name text NOT NULL,
+    commission_rate numeric(5,2) DEFAULT 0.05
+);
+
+
+ALTER TABLE public.salesmen OWNER TO u0_a202;
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: u0_a202
+--
+
+CREATE TABLE public.users (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    username text NOT NULL,
+    email text NOT NULL,
+    password_hash text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    role character varying(20) DEFAULT 'USER'::character varying
+);
+
+
+ALTER TABLE public.users OWNER TO u0_a202;
+
+--
+-- Name: notification_queue id; Type: DEFAULT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.notification_queue ALTER COLUMN id SET DEFAULT nextval('public.notification_queue_id_seq'::regclass);
+
+
+--
+-- Data for Name: amortization_schedule; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.amortization_schedule (id, debt_id, installment_number, due_date, principal_cents, interest_cents, total_payment_cents, remaining_balance_cents, status, paid_at) FROM stdin;
+866a510c-3fea-49ee-bdde-2e9aecd4f24e	f3cd2390-8775-4953-8126-bd509e31e818	1	2026-06-01	8000	2000	10000	86700	OVERDUE	\N
+\.
+
+
+--
+-- Data for Name: audit_logs; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.audit_logs (id, entity_type, entity_id, action, metadata, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: customers; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.customers (id, phone, name, tenant_id, national_id, email, created_at) FROM stdin;
+993756d6-a2c2-4a7e-87d3-1f218eb7798c	01	\N	USER-001	\N	\N	2026-06-07 04:58:17.669672+02
+b0fffb66-d9af-468e-8c9f-84d05b7b9381	01000000001	عميل افتراضي	USER-001	\N	\N	2026-06-07 04:58:17.737489+02
+7ccaf14d-6554-4f38-b8b2-4425e4f6c132	01000000002	عميل A	TENANT-A	\N	\N	2026-06-07 04:58:17.737489+02
+e8989990-ed78-4cb6-8f7b-f1d35b104d3e	01000000003	عميل B	TENANT-B	\N	\N	2026-06-07 04:58:17.737489+02
+54a464d2-2ff2-4cdf-b178-1ec386d27751	01012345678	أحمد محمد	4c17051d-0760-4d02-b130-a13cf5d3ed20	12345678901234	\N	2026-06-07 05:04:10.058954+02
+f203d653-1b82-4c0a-aae4-954e94a10d6b	01018959352	Test Customer	USER-001	\N	\N	2026-06-09 20:22:48.107543+02
+e3d54b89-450e-4cde-9101-eba534b371d2	01042104245	Test Customer	USER-001	\N	\N	2026-06-10 06:36:41.780065+02
+\.
+
+
+--
+-- Data for Name: debt_agreements; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.debt_agreements (id, user_id, principal_cents, currency, annual_rate_bps, term_months, amort_type, status, created_at, customer_id) FROM stdin;
+f3cd2390-8775-4953-8126-bd509e31e818	4c17051d-0760-4d02-b130-a13cf5d3ed20	100000	EGP	1000	12	DECLINING	ACTIVE	2026-06-10 06:36:41.807686+02	54a464d2-2ff2-4cdf-b178-1ec386d27751
+\.
+
+
+--
+-- Data for Name: financial_events; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.financial_events (id, event_type, payload, created_at) FROM stdin;
+ba235822-90c1-40dd-af84-7c5e5801a6e2	InstallmentOverdue	{"dueDate": "2026-06-09T00:00:00.000Z", "currency": "EGP", "daysLate": 1, "customerId": "user_01", "occurredAt": "2026-06-10T04:36:41.894Z", "amountCents": "10000", "installmentId": "866a510c-3fea-49ee-bdde-2e9aecd4f24e"}	2026-06-10 06:36:41.872694+02
+\.
+
+
+--
+-- Data for Name: financial_periods; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.financial_periods (id, tenant_id, start_date, end_date, status, created_at) FROM stdin;
+cccb8ffe-ca34-4458-9217-4fdab24e3923	test_tenant_1	2026-06-01	2026-06-30	OPEN	2026-06-09 11:06:58.732747+02
+5783c6af-60f2-4668-af7f-1b52afbeb76b	test_tenant_2	2026-06-01	2026-06-30	CLOSED	2026-06-09 11:06:58.825281+02
+1caf3372-30e4-465f-9557-a029020171c8	test_cycle_tenant	2026-06-01	2026-06-30	OPEN	2026-06-09 12:14:58.87924+02
+\.
+
+
+--
+-- Data for Name: journal_entries; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.journal_entries (id, tenant_id, reference, description, currency, lines, created_at) FROM stdin;
+6294e8d4-fad0-4311-adc3-cf956a450cce	4c17051d-0760-4d02-b130-a13cf5d3ed20	PAY-001	Payment Received	EGP	"[{\\"account\\":\\"CASH_ASSET\\",\\"type\\":\\"DEBIT\\",\\"amount\\":\\"75809\\"},{\\"account\\":\\"LOAN_RECEIVABLE\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"70194\\"},{\\"account\\":\\"INTEREST_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"5615\\"}]"	2026-06-09 06:18:12.819+02
+1bc5acbd-61a8-42ee-b971-c3039f3e1c68	test_cycle_tenant	REF_OPEN	Payment entry	EGP	"[{\\"account\\":\\"CASH\\",\\"type\\":\\"DEBIT\\",\\"amount\\":\\"1000\\"},{\\"account\\":\\"LOAN_RECEIVABLE\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"1000\\"},{\\"account\\":\\"INTEREST_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"0\\"},{\\"account\\":\\"PENALTY_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"0\\"}]"	2026-06-09 12:14:58.912+02
+a6ecd169-e0e0-418a-96be-8affc8f1d91e	sanity_check_tenant	SANITY_001	Payment entry	EGP	"[{\\"account\\":\\"CASH\\",\\"type\\":\\"DEBIT\\",\\"amount\\":\\"50000\\"},{\\"account\\":\\"LOAN_RECEIVABLE\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"50000\\"},{\\"account\\":\\"INTEREST_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"0\\"},{\\"account\\":\\"PENALTY_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"0\\"}]"	2026-06-09 12:28:18.053+02
+397c8308-ab26-41d0-af9b-7e63afb7d597	4c17051d-0760-4d02-b130-a13cf5d3ed20	PAY-7ccff621-1b05-45fd-a677-a0133b71de48	Payment Received	EGP	"[{\\"account\\":\\"CASH_ASSET\\",\\"type\\":\\"DEBIT\\",\\"amount\\":\\"75809\\"},{\\"account\\":\\"LOAN_RECEIVABLE\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"70194\\"},{\\"account\\":\\"INTEREST_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"5615\\"}]"	2026-06-09 14:36:37.581+02
+868d6d7d-e945-4404-b4be-14888cbb099f	test-user	PAY-abab0a1b-38fa-4a05-9b71-8c9c405cf14d	Payment Received	EGP	"[{\\"account\\":\\"CASH_ASSET\\",\\"type\\":\\"DEBIT\\",\\"amount\\":\\"50000\\"},{\\"account\\":\\"LOAN_RECEIVABLE\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"45000\\"},{\\"account\\":\\"INTEREST_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"5000\\"}]"	2026-06-10 11:31:04.205+02
+2fd5c857-554c-4b2c-b4e1-a36678e044ae	test-user	PAY-923ca32b-e69d-4126-91db-594c972a707a	Payment Received	EGP	"[{\\"account\\":\\"CASH_ASSET\\",\\"type\\":\\"DEBIT\\",\\"amount\\":\\"50000\\"},{\\"account\\":\\"LOAN_RECEIVABLE\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"45000\\"},{\\"account\\":\\"INTEREST_INCOME\\",\\"type\\":\\"CREDIT\\",\\"amount\\":\\"5000\\"}]"	2026-06-10 11:31:33.073+02
+\.
+
+
+--
+-- Data for Name: ledger_entries; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.ledger_entries (id, merchant_id, order_id, type, debit_account, credit_account, amount, created_at) FROM stdin;
+6a105a88-605d-4fea-97f4-2a46b9ce4670	aa9e6627-9ac5-4ea7-95d9-f41c55efca72	0d0c235a-58ec-4c68-b8dc-4494a98ccc47	SALE	CASH_RECEIVABLE	SALES_REVENUE	1000.00	2026-06-05 10:02:49.625702+02
+84f7d5f7-2904-4c83-810b-317fe3c1408a	aa9e6627-9ac5-4ea7-95d9-f41c55efca72	0d0c235a-58ec-4c68-b8dc-4494a98ccc47	COMMISSION	SALESMAN_PAYABLE	SALESMAN_COMMISSION	100.00	2026-06-05 10:02:49.625702+02
+\.
+
+
+--
+-- Data for Name: merchants; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.merchants (id, name, phone, status, plan, created_at) FROM stdin;
+aa9e6627-9ac5-4ea7-95d9-f41c55efca72	موزع الجملة	0100	PENDING	FREE	2026-06-05 10:02:49.581559+02
+e9545337-cb12-4d94-8542-1c43d053820f	متجر الجملة التجريبي	01012345678	PENDING	FREE	2026-06-05 10:28:52.590243+02
+8c039276-b59c-4f52-8fa7-7fa54882c821	المتجر الرئيسي	01011122233	PENDING	FREE	2026-06-05 10:31:17.622953+02
+\.
+
+
+--
+-- Data for Name: notification_queue; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.notification_queue (id, user_id, message, status, created_at, retry_count, locked_at) FROM stdin;
+1	4c17051d-0760-4d02-b130-a13cf5d3ed20	اختبار النظام 01	SENT	2026-06-10 14:03:28.409827	0	\N
+\.
+
+
+--
+-- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.notifications (id, tenant_id, customer_id, debt_id, type, title, body, is_read, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: order_items; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.order_items (id, order_id, product_id, quantity, price) FROM stdin;
+c294933b-9cdc-4e18-9239-b7646688b81e	0d0c235a-58ec-4c68-b8dc-4494a98ccc47	fc98cbde-4b1c-43a3-af4b-16a506b2d2fb	1	1000.00
+\.
+
+
+--
+-- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.orders (id, merchant_id, customer_id, total_amount, status, payment_method, created_at, salesman_id) FROM stdin;
+0d0c235a-58ec-4c68-b8dc-4494a98ccc47	aa9e6627-9ac5-4ea7-95d9-f41c55efca72	993756d6-a2c2-4a7e-87d3-1f218eb7798c	1000.00	CONFIRMED	\N	2026-06-05 10:02:49.625702+02	590e6a53-08b8-4849-a45a-bf172761835e
+\.
+
+
+--
+-- Data for Name: payments; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.payments (id, debt_id, amount_cents, currency, penalties_paid, interest_paid, principal_paid, remaining, paid_at) FROM stdin;
+3ef7d1f6-0c56-49e9-bf3e-f4859a7d6a0f	f3cd2390-8775-4953-8126-bd509e31e818	5000	EGP	0	0	0	0	2026-06-10 09:41:14.558+02
+abab0a1b-38fa-4a05-9b71-8c9c405cf14d	f3cd2390-8775-4953-8126-bd509e31e818	50000	EGP	0	5000	45000	0	2026-06-10 11:31:04.161065+02
+923ca32b-e69d-4126-91db-594c972a707a	f3cd2390-8775-4953-8126-bd509e31e818	50000	EGP	0	5000	45000	0	2026-06-10 11:31:33.06237+02
+\.
+
+
+--
+-- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.products (id, merchant_id, title, description, price, stock, is_active, created_at) FROM stdin;
+fc98cbde-4b1c-43a3-af4b-16a506b2d2fb	aa9e6627-9ac5-4ea7-95d9-f41c55efca72	بضاعة	\N	1000.00	0	t	2026-06-05 10:02:49.603386+02
+f19b9b70-d6b2-4e23-901b-cc87f10a5e2c	8c039276-b59c-4f52-8fa7-7fa54882c821	تيشرت قطني	\N	500.00	10	t	2026-06-05 10:33:28.138913+02
+\.
+
+
+--
+-- Data for Name: salesmen; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.salesmen (id, merchant_id, name, commission_rate) FROM stdin;
+590e6a53-08b8-4849-a45a-bf172761835e	aa9e6627-9ac5-4ea7-95d9-f41c55efca72	أحمد المندوب	0.10
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: u0_a202
+--
+
+COPY public.users (id, username, email, password_hash, created_at, role) FROM stdin;
+4c17051d-0760-4d02-b130-a13cf5d3ed20	حسام	hossam@selfni.com	$2b$10$iuVBOxvJlGzCM78L61qErOptIst.X0PX7fAyYbR1iPJZmzAfEq4ZS	2026-06-04 12:50:46.901706+02	USER
+\.
+
+
+--
+-- Name: notification_queue_id_seq; Type: SEQUENCE SET; Schema: public; Owner: u0_a202
+--
+
+SELECT pg_catalog.setval('public.notification_queue_id_seq', 1, true);
+
+
+--
+-- Name: amortization_schedule amortization_schedule_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.amortization_schedule
+    ADD CONSTRAINT amortization_schedule_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: audit_logs audit_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.audit_logs
+    ADD CONSTRAINT audit_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: customers customers_phone_unique; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.customers
+    ADD CONSTRAINT customers_phone_unique UNIQUE (phone);
+
+
+--
+-- Name: customers customers_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.customers
+    ADD CONSTRAINT customers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: debt_agreements debt_agreements_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.debt_agreements
+    ADD CONSTRAINT debt_agreements_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: financial_events financial_events_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.financial_events
+    ADD CONSTRAINT financial_events_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: financial_periods financial_periods_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.financial_periods
+    ADD CONSTRAINT financial_periods_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: journal_entries journal_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.journal_entries
+    ADD CONSTRAINT journal_entries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ledger_entries ledger_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.ledger_entries
+    ADD CONSTRAINT ledger_entries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: merchants merchants_phone_key; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.merchants
+    ADD CONSTRAINT merchants_phone_key UNIQUE (phone);
+
+
+--
+-- Name: merchants merchants_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.merchants
+    ADD CONSTRAINT merchants_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: notification_queue notification_queue_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.notification_queue
+    ADD CONSTRAINT notification_queue_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: order_items order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.order_items
+    ADD CONSTRAINT order_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.payments
+    ADD CONSTRAINT payments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.products
+    ADD CONSTRAINT products_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: salesmen salesmen_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.salesmen
+    ADD CONSTRAINT salesmen_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: idx_journal_reference; Type: INDEX; Schema: public; Owner: u0_a202
+--
+
+CREATE INDEX idx_journal_reference ON public.journal_entries USING btree (reference);
+
+
+--
+-- Name: idx_journal_tenant; Type: INDEX; Schema: public; Owner: u0_a202
+--
+
+CREATE INDEX idx_journal_tenant ON public.journal_entries USING btree (tenant_id);
+
+
+--
+-- Name: idx_notifications_tenant; Type: INDEX; Schema: public; Owner: u0_a202
+--
+
+CREATE INDEX idx_notifications_tenant ON public.notifications USING btree (tenant_id);
+
+
+--
+-- Name: idx_notifications_unread; Type: INDEX; Schema: public; Owner: u0_a202
+--
+
+CREATE INDEX idx_notifications_unread ON public.notifications USING btree (tenant_id, is_read) WHERE (is_read = false);
+
+
+--
+-- Name: idx_payments_debt; Type: INDEX; Schema: public; Owner: u0_a202
+--
+
+CREATE INDEX idx_payments_debt ON public.payments USING btree (debt_id);
+
+
+--
+-- Name: idx_schedule_debt; Type: INDEX; Schema: public; Owner: u0_a202
+--
+
+CREATE INDEX idx_schedule_debt ON public.amortization_schedule USING btree (debt_id);
+
+
+--
+-- Name: uq_installment_overdue; Type: INDEX; Schema: public; Owner: u0_a202
+--
+
+CREATE UNIQUE INDEX uq_installment_overdue ON public.financial_events USING btree (event_type, ((payload ->> 'installmentId'::text))) WHERE ((event_type)::text = 'InstallmentOverdue'::text);
+
+
+--
+-- Name: amortization_schedule amortization_schedule_debt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.amortization_schedule
+    ADD CONSTRAINT amortization_schedule_debt_id_fkey FOREIGN KEY (debt_id) REFERENCES public.debt_agreements(id);
+
+
+--
+-- Name: debt_agreements debt_agreements_customer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.debt_agreements
+    ADD CONSTRAINT debt_agreements_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES public.customers(id);
+
+
+--
+-- Name: ledger_entries ledger_entries_merchant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.ledger_entries
+    ADD CONSTRAINT ledger_entries_merchant_id_fkey FOREIGN KEY (merchant_id) REFERENCES public.merchants(id);
+
+
+--
+-- Name: ledger_entries ledger_entries_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.ledger_entries
+    ADD CONSTRAINT ledger_entries_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id);
+
+
+--
+-- Name: notifications notifications_customer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES public.customers(id);
+
+
+--
+-- Name: notifications notifications_debt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_debt_id_fkey FOREIGN KEY (debt_id) REFERENCES public.debt_agreements(id);
+
+
+--
+-- Name: order_items order_items_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.order_items
+    ADD CONSTRAINT order_items_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id);
+
+
+--
+-- Name: order_items order_items_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.order_items
+    ADD CONSTRAINT order_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id);
+
+
+--
+-- Name: orders orders_customer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES public.customers(id);
+
+
+--
+-- Name: orders orders_merchant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_merchant_id_fkey FOREIGN KEY (merchant_id) REFERENCES public.merchants(id);
+
+
+--
+-- Name: orders orders_salesman_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_salesman_id_fkey FOREIGN KEY (salesman_id) REFERENCES public.salesmen(id);
+
+
+--
+-- Name: payments payments_debt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.payments
+    ADD CONSTRAINT payments_debt_id_fkey FOREIGN KEY (debt_id) REFERENCES public.debt_agreements(id);
+
+
+--
+-- Name: products products_merchant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.products
+    ADD CONSTRAINT products_merchant_id_fkey FOREIGN KEY (merchant_id) REFERENCES public.merchants(id);
+
+
+--
+-- Name: salesmen salesmen_merchant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: u0_a202
+--
+
+ALTER TABLE ONLY public.salesmen
+    ADD CONSTRAINT salesmen_merchant_id_fkey FOREIGN KEY (merchant_id) REFERENCES public.merchants(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict IJCvQGQV6Pf6rRbmdB5CSbHoFUL7E1V9yeSscRHNEgdIrap8qvzWMwuBX9pdjGF
+

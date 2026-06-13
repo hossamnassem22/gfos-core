@@ -1,22 +1,23 @@
-name: Foundation
+name: Foundation CI
 
 on:
   push:
-    branches: [ main ]
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+
       - name: Install dependencies
         run: npm install
-      - name: Run lint
-        run: npm run lint
-      - name: Run test
-        run: npm run test
+
+      - name: Run tests
+        run: npm test

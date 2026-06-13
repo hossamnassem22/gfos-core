@@ -1,9 +1,13 @@
 {
   "lint": {
-    "include": ["src", "tests"],
-    "exclude": ["node_modules"]
+    "rules": {
+      "exclude": []
+    }
   },
-  "test": {
-    "include": ["tests", "src"]
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": true
   }
 }

@@ -1,14 +1,25 @@
 name: CI Quality Check
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+
+      - uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-      - name: Lint Code
+
+      - name: Cache dependencies
+        run: deno cache src/Kernel.lagda.md
+
+      - name: Lint
         run: deno lint
-      - name: Audit Dependencies
-        run: deno task audit
+
+      - name: Test
+        run: deno test --allow-all
