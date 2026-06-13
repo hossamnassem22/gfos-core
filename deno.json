@@ -1,5 +1,9 @@
 {
   "lint": {
-    "use": true
+    "include": ["src", "tests"],
+    "exclude": ["node_modules"]
+  },
+  "test": {
+    "include": ["tests", "src"]
   }
 }
