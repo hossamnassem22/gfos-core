@@ -1,13 +1,3 @@
-# Dependencies
 node_modules/
-deno_dir/
-
-# Environment and Data
-.env
-backups/
-logs/
-postmaster.pid
-
-# System/IDE
-.DS_Store
-.vscode/
+deno.lock
+npm-debug.log
