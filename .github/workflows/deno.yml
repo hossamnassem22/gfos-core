@@ -19,6 +19,9 @@ jobs:
         with:
           deno-version: v1.x
 
+      - name: Cache dependencies
+        run: deno cache src/main.ts
+
       - name: Lint
         run: deno lint
 
