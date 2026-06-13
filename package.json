@@ -2,10 +2,10 @@
   "name": "gfos-core",
   "version": "1.0.0",
   "scripts": {
-    "test": "echo \"No tests yet\" && exit 0",
-    "lint": "eslint ."
+    "test": "deno test --allow-all",
+    "lint": "deno lint"
   },
   "devDependencies": {
-    "eslint": "^9.0.0"
+    "eslint": "^10.5.0"
   }
 }

@@ -2,7 +2,6 @@ name: Agda CI
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
@@ -10,22 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install Agda
         run: |
           sudo apt-get update
           sudo apt-get install -y agda
 
-      - name: Setup Agda libraries
-        run: |
-          mkdir -p ~/.agda
-          echo "financial-topos.agda-lib" >> ~/.agda/libraries
-          echo "financial-topos" >> ~/.agda/defaults
-
-      - name: Verify Agda installation
-        run: agda --version
-
-      - name: Build Kernel
-        run: agda src/Kernel.lagda.md
+      - name: Build
+        run: agda src/Kernel.lagda.md --library-file=financial-topos.agda-lib
