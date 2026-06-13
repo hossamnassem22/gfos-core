@@ -2,22 +2,34 @@ name: Foundation CI
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
         with:
-          node-version: 20
+          deno-version: v1.x
 
-      - name: Install dependencies
-        run: npm install
+      - name: Cache dependencies
+        run: deno cache src/main.ts
+
+      - name: Lint
+        run: deno lint
+
+      - name: Format check
+        run: deno fmt --check
+
+      - name: Type check
+        run: deno check src/main.ts
 
       - name: Run tests
-        run: npm test
+        run: deno test --allow-all
