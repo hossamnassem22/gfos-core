@@ -23,5 +23,5 @@ jobs:
         with:
           languages: javascript
 
-      - name: Perform Analysis
+      - name: Analyze
         uses: github/codeql-action/analyze@v3

@@ -7,4 +7,4 @@ jobs:
   legacy-disabled:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Legacy ts-node tests removed. Replaced by Deno test suite."
+      - run: echo "Legacy ts-node tests removed. Using Deno CI instead."
