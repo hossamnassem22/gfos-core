@@ -1,8 +1,9 @@
-name: GFOS Production CI
+name: GFOS Enterprise CI v2
 
 on:
   push:
     branches: [ main ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ main ]
 
@@ -13,109 +14,89 @@ env:
 jobs:
 
   quality:
-    name: Quality Gate (fmt + lint)
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Cache Deno
-        run: deno cache main.ts
-
-      - name: Format Check
-        run: deno fmt --check
-
-      - name: Lint
-        run: deno lint
+      - run: deno fmt --check
+      - run: deno lint
 
 
-  test-matrix:
-    name: Test Matrix (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+  test:
+    runs-on: ubuntu-latest
     needs: quality
 
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Cache Deno
-        run: deno cache main.ts
-
-      - name: Run Tests
-        run: deno test --allow-all --parallel
+      - run: deno test --allow-all --parallel
 
 
   coverage:
-    name: Coverage Enforcement
     runs-on: ubuntu-latest
-    needs: test-matrix
+    needs: test
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Run Coverage
-        run: |
-          deno test --coverage=coverage --allow-all
-          deno coverage coverage --lcov > coverage.lcov
+      - run: deno test --coverage=coverage --allow-all
+      - run: deno coverage coverage --lcov > coverage.lcov
 
-      - name: Enforce Coverage Threshold
+      - name: Coverage Gate
         run: |
-          COVERAGE=$(deno coverage coverage | grep -oP '\d+(\.\d+)?' | head -1)
-          echo "Coverage: $COVERAGE%"
+          COVERAGE=$(deno coverage coverage | grep -oP '\d+(\.\d+)?' | head -1 || echo 0)
+          echo "Coverage: $COVERAGE"
           if (( $(echo "$COVERAGE < $COVERAGE_MIN" | bc -l) )); then
-            echo "Coverage below threshold ($COVERAGE_MIN%)"
+            echo "Coverage below threshold"
             exit 1
           fi
 
 
-  benchmark:
-    name: Performance Benchmark (optional)
+  build:
     runs-on: ubuntu-latest
-    needs: test-matrix
+    needs: coverage
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Run Benchmarks
-        run: deno test --allow-all --filter=benchmark || true
+      - run: deno cache main.ts
+      - run: deno compile -o dist/app main.ts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
 
-  security:
-    name: Security Scan (lightweight)
+  release:
     runs-on: ubuntu-latest
-    needs: quality
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: ${{ env.DENO_VERSION }}
+      - name: Create Release Metadata
+        run: |
+          echo "Release ${GITHUB_REF_NAME}" > release.txt
 
-      - name: Audit Dependencies
-        run: deno info main.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: release.txt

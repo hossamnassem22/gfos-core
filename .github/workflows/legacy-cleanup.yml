@@ -1,0 +1,10 @@
+name: Legacy Cleanup Guard
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Legacy pipelines disabled. CI v2 active."

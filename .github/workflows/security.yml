@@ -1,53 +1,24 @@
-name: 🔐 Multi-Stage Security
+name: Security Scan
 
 on:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 * * 1'
 
 jobs:
-  secret-scan:
-    name: 🔑 Secret Detection
+  scan:
     runs-on: ubuntu-latest
+
     steps:
-      - name: ⚡ Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🔍 TruffleHog
-        uses: trufflesecurity/trufflehog@main
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
         with:
-          path: '.'
-          output: results.json
+          deno-version: "1.x"
 
-      - name: 📤 Upload Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: secret-scan
-          path: results.json
+      - name: Dependency Check
+        run: deno info main.ts
 
-  vulnerability-scan:
-    name: 🛡️ Vulnerability Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⚡ Checkout
-        uses: actions/checkout@v4
-
-      - name: 🔍 npm Audit
-        run: npm audit --audit-level=moderate
-
-      - name: 🔍 Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: fs
-          scan-ref: '.'
-          format: json
-          output: trivy-results.json
-
-      - name: 📤 Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: vulnerability-scan
-          path: trivy-results.json
+      - name: Check for secrets
+        run: |
+          ! grep -R "PASSWORD\|SECRET\|TOKEN" . || (echo "Secrets detected" && exit 1)

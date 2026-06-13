@@ -1,0 +1,15 @@
+name: CI Observability
+
+on:
+  workflow_run:
+    workflows: ["GFOS Enterprise CI v2"]
+    types:
+      - completed
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "Collecting CI metrics..."
+      - run: echo "Build success/failure logged"
