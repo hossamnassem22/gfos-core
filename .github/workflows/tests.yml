@@ -1,8 +1,10 @@
-name: GFOS Property Tests
+name: GFOS Tests
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   test:
@@ -11,10 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v6
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
         with:
-          node-version: 20
+          deno-version: v1.x
 
-      - run: npm install
+      - name: Cache
+        run: deno cache src/main.ts
 
-      - run: npx ts-node genesis/test/property/ordering-contract.test.ts
+      - name: Run tests
+        run: deno test --allow-all
