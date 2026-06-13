@@ -1,4 +1,4 @@
-name: GFOS Enterprise Deno CI
+name: GFOS Production CI
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 env:
   DENO_VERSION: "1.x"
+  COVERAGE_MIN: "80"
 
 jobs:
 
@@ -23,7 +24,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Cache
+      - name: Cache Deno
         run: deno cache main.ts
 
       - name: Format Check
@@ -33,10 +34,15 @@ jobs:
         run: deno lint
 
 
-  unit-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
+  test-matrix:
+    name: Test Matrix (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     needs: quality
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -46,17 +52,17 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Cache
+      - name: Cache Deno
         run: deno cache main.ts
 
-      - name: Run Unit Tests
+      - name: Run Tests
         run: deno test --allow-all --parallel
 
 
   coverage:
-    name: Coverage Report
+    name: Coverage Enforcement
     runs-on: ubuntu-latest
-    needs: unit-tests
+    needs: test-matrix
 
     steps:
       - uses: actions/checkout@v4
@@ -71,11 +77,20 @@ jobs:
           deno test --coverage=coverage --allow-all
           deno coverage coverage --lcov > coverage.lcov
 
+      - name: Enforce Coverage Threshold
+        run: |
+          COVERAGE=$(deno coverage coverage | grep -oP '\d+(\.\d+)?' | head -1)
+          echo "Coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < $COVERAGE_MIN" | bc -l) )); then
+            echo "Coverage below threshold ($COVERAGE_MIN%)"
+            exit 1
+          fi
+
 
   benchmark:
-    name: Performance Benchmark
+    name: Performance Benchmark (optional)
     runs-on: ubuntu-latest
-    needs: unit-tests
+    needs: test-matrix
 
     steps:
       - uses: actions/checkout@v4
@@ -85,5 +100,22 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Run Benchmark Tests
+      - name: Run Benchmarks
         run: deno test --allow-all --filter=benchmark || true
+
+
+  security:
+    name: Security Scan (lightweight)
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: Audit Dependencies
+        run: deno info main.ts
