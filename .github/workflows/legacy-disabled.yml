@@ -1,4 +1,4 @@
-name: Legacy Disabled Pipelines
+name: Legacy Disabled
 
 on:
   workflow_dispatch:
@@ -7,4 +7,4 @@ jobs:
   disabled:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "All legacy pipelines disabled. Using GFOS Deno CI."
+      - run: echo "Legacy pipelines disabled. Using GFOS Optimized CI."
