@@ -1,0 +1,10 @@
+name: GFOS Property Tests (disabled legacy)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  legacy-disabled:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Legacy ts-node tests removed. Replaced by Deno test suite."
