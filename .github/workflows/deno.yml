@@ -1,0 +1,35 @@
+name: 🚀 Quantum-Grade Deno Enterprise CI
+
+on:
+  push:
+    branches: [ main, 'release/**', 'hotfix/**' ]
+
+  pull_request:
+    branches: [ main ]
+
+env:
+  DENO_VERSION: '1.40.4'
+  CACHE_VERSION: 'v3'
+
+jobs:
+  pre-flight-gate:
+    name: 🚦 Pre Flight Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: Format Check
+        run: deno fmt --check
+
+      - name: Lint Check
+        run: deno lint
+
+      - name: Test
+        run: deno test --allow-all
