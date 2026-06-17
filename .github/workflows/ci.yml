@@ -78,7 +78,7 @@ jobs:
       - run: deno cache main.ts
       - run: deno compile -o dist/app main.ts
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -96,7 +96,7 @@ jobs:
         run: |
           echo "Release ${GITHUB_REF_NAME}" > release.txt
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release
           path: release.txt
