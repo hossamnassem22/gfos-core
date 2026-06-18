@@ -1,10 +1,10 @@
 import { FastifyInstance } from "npm:fastify";
 import { PaymentWaterfall } from "@core/financial-engine/waterfall.ts";
-import { DebtRepository } from "@infra/persistence/DebtRepository.ts";
-import { JournalRepository } from "@infra/persistence/JournalRepository.ts";
+import { DebtRepository } from "../../../infrastructure/persistence/DebtRepository.ts";
+import { JournalRepository } from "../../../infrastructure/persistence/JournalRepository.ts";
 import { JournalEngine } from "@core/ledger/JournalEngine.ts";
 import { Money } from "@core/precision/value-objects.ts";
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../../../infrastructure/database/connection.ts";
 import { requireAuth } from "../middleware/auth.ts";
 
 const waterfall = new PaymentWaterfall();

@@ -1,4 +1,4 @@
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../../database/connection.ts";
 import { JournalEntry, TrialBalanceRow, AccountCode } from "@core/ledger/types.ts";
 
 const jsonReplacer = (_key: string, value: any) =>

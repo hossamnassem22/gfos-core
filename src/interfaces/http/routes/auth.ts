@@ -1,5 +1,5 @@
 import { FastifyInstance } from "npm:fastify";
-import { AuthService } from "@infra/auth/AuthService.ts";
+import { AuthService } from "../../infrastructure/auth/AuthService.ts";
 
 const authService = new AuthService();
 

@@ -1,6 +1,6 @@
 import { FastifyInstance } from "npm:fastify";
 import { requireAuth } from "../middleware/auth.ts";
-import { DebtRepository } from "@infra/persistence/DebtRepository.ts";
+import { DebtRepository } from "../../../infrastructure/persistence/DebtRepository.ts";
 
 const debtRepo = new DebtRepository();
 

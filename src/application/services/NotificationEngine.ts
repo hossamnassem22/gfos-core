@@ -1,5 +1,5 @@
-import { sql } from "@infra/database/connection.ts";
-import { EmailSender } from "@infra/mail/EmailSender.ts";
+import { sql } from "../../../infrastructure/database/connection.ts";
+import { EmailSender } from "../../infrastructure/mail/EmailSender.ts";
 
 export class NotificationEngine {
   static async process() {

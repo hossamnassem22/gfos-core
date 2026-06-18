@@ -1,5 +1,5 @@
 import { FastifyInstance } from "npm:fastify";
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../../../infrastructure/database/connection.ts";
 
 export async function statementRoutes(app: FastifyInstance) {
 

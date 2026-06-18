@@ -1,4 +1,4 @@
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../database/connection.ts";
 
 export class AuditLogger {
   static async log(userId: string, action: string, details: any) {

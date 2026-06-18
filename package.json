@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "test": "deno test --allow-all",
-    "lint": "deno lint"
+    "lint": "deno lint",
+    "build": "deno bundle src/main.ts dist/bundle.js",
+    "start": "deno run --allow-net --allow-read src/server.ts"
   },
   "devDependencies": {
     "eslint": "^10.5.0"

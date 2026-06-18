@@ -1,8 +1,8 @@
 import { FastifyInstance } from "npm:fastify";
 import { DebtRestructuringEngine } from "@core/financial-engine/restructuring.ts";
-import { DebtRepository } from "@infra/persistence/DebtRepository.ts";
+import { DebtRepository } from "../../../infrastructure/persistence/DebtRepository.ts";
 import { AmortizationEngine, AmortizationType } from "@core/financial-engine/amortization.ts";
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../../../infrastructure/database/connection.ts";
 
 export async function restructuringRoutes(app: FastifyInstance) {
   const restructuringEngine = new DebtRestructuringEngine();

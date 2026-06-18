@@ -1,4 +1,4 @@
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../../infrastructure/database/connection.ts";
 
 export async function runReminderWorker() {
   console.log("Running payment reminder worker...");

@@ -1,6 +1,6 @@
 import { FastifyInstance } from "npm:fastify";
 import { requireAuth } from "../middleware/auth.ts";
-import { JournalRepository } from "@infra/persistence/JournalRepository.ts";
+import { JournalRepository } from "../../../infrastructure/persistence/JournalRepository.ts";
 import { JournalEngine } from "@core/ledger/JournalEngine.ts";
 
 const journalRepo = new JournalRepository();

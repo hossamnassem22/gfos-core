@@ -1,4 +1,4 @@
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../database/connection.ts";
 
 export class WhatsAppService {
   async sendPaymentReminder(phoneNumber: string, message: string) {

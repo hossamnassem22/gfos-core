@@ -1,4 +1,4 @@
-import { sql } from "@infra/database/connection.ts";
+import { sql } from "../../database/connection.ts";
 
 export interface Order {
   merchantId: string;
