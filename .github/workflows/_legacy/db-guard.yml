@@ -1,0 +1,27 @@
+name: Database Guard
+
+on:
+  workflow_call:
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan forbidden imports
+        run: |
+          echo "Scanning database layer safety..."
+
+          if grep -R "\.\./\.\./database" src; then
+            echo "❌ forbidden relative database import"
+            exit 1
+          fi
+
+          if grep -R "@infra/database" src; then
+            echo "❌ infra alias still exists"
+            exit 1
+          fi
+
+          echo "✅ database layer clean"

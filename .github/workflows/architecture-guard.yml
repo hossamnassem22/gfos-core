@@ -1,0 +1,19 @@
+name: Architecture Guard Layer
+
+on:
+  pull_request:
+  push:
+    branches: [ main, refactor/**, feature/** ]
+
+jobs:
+  architecture-guard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Architecture Guard
+        run: |
+          chmod +x scripts/guards/architecture-guard.sh
+          bash scripts/guards/architecture-guard.sh

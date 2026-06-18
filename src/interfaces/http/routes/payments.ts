@@ -4,7 +4,7 @@ import { DebtRepository } from "../../../infrastructure/persistence/DebtReposito
 import { JournalRepository } from "../../../infrastructure/persistence/JournalRepository.ts";
 import { JournalEngine } from "@core/ledger/JournalEngine.ts";
 import { Money } from "@core/precision/value-objects.ts";
-import { sql } from "../../../infrastructure/database/connection.ts";
+import { sql } from "../../../infrastructu../../infrastructure/database/connection.ts";
 import { requireAuth } from "../middleware/auth.ts";
 
 const waterfall = new PaymentWaterfall();

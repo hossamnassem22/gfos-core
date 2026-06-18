@@ -1,0 +1,21 @@
+name: Build Validation
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Cache build
+        run: deno cache src/main.ts
+
+      - name: Type check
+        run: deno check src/main.ts

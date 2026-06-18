@@ -1,4 +1,4 @@
-import { sql } from "../../infrastructure/database/connection.ts";
+import { sql } from "../../infrastructu../../infrastructure/database/connection.ts";
 
 export class CommissionService {
   async processCommission(orderId: string, salesmanId: string, amount: number) {

@@ -1,4 +1,4 @@
-import { runMigrations, sql } from "../database/connection.ts";
+import { runMigrations, sql } from "../../infrastructure/database/connection.ts";
 
 // اختبار الكتابة والقراءة
 async function testDB() {

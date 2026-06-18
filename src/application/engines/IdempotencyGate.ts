@@ -1,4 +1,4 @@
-import { db } from "../../infrastructure/db/connection.ts";
+import { db } from "../../infrastructure/database/connection.ts";
 
 export class IdempotencyGate {
   async execute<T>(key: string, action: () => Promise<T>): Promise<T> {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "npm:fastify";
-import { sql } from "../../../infrastructure/database/connection.ts";
+import { sql } from "../../../infrastructu../../infrastructure/database/connection.ts";
 import { requireAuth } from "../middleware/auth.ts";
 
 export async function analyticsRoutes(app: FastifyInstance) {

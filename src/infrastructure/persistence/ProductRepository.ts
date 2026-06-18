@@ -1,4 +1,4 @@
-import { sql } from "../../database/connection.ts";
+import { sql } from "../../infrastructure/database/connection.ts";
 
 export interface Product {
   id?: string;

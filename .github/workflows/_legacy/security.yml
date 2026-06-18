@@ -1,0 +1,20 @@
+name: Security Scan
+
+on:
+  workflow_call:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Basic security validation
+        run: |
+          echo "Running security rules..."
+
+          grep -R "password\s*=" src && exit 1 || true
+          grep -R "process\.env\.SECRET" src && exit 1 || true
+
+          echo "Security OK"

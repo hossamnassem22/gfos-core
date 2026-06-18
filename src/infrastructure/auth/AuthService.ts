@@ -1,6 +1,6 @@
 import jwt from "npm:jsonwebtoken";
 import bcrypt from "npm:bcryptjs";
-import { sql } from "../database/connection.ts";
+import { sql } from "../../infrastructure/database/connection.ts";
 
 const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "selfni-dev-secret-change-in-prod";
 const JWT_EXPIRES = "24h";
