@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "noLegacyDatabasePaths": [
+      "../../database",
+      "../database"
+    ],
+    "noInfraAlias": [
+      "@infra/database"
+    ],
+    "forbiddenCrossImports": [
+      {
+        "from": "domain",
+        "deny": ["infrastructure", "interfaces"]
+      },
+      {
+        "from": "application",
+        "deny": ["interfaces"]
+      }
+    ]
+  }
+}

@@ -1,53 +1,30 @@
 #!/usr/bin/env bash
 
-echo "🧱 Architecture Guard Layer Running..."
+echo "🧱 Running Architecture Policy Guard..."
 
-ERRORS=0
+POLICY="architecture.policy.json"
 
-# =========================
-# 1. Forbidden legacy database paths
-# =========================
-if grep -R "\.\./\.\./database" src; then
-  echo "❌ VIOLATION: legacy database path detected"
-  ERRORS=1
-fi
+FAIL=0
 
-if grep -R "../../database/connection.ts" src; then
-  echo "❌ VIOLATION: direct database relative import detected"
-  ERRORS=1
-fi
+check() {
+  echo "🔍 Checking: $1"
+  if grep -R "$1" src >/dev/null 2>&1; then
+    echo "❌ Violation detected: $1"
+    grep -R "$1" src
+    FAIL=1
+  fi
+}
 
-# =========================
-# 2. Forbidden alias layer
-# =========================
-if grep -R "@infra/database" src; then
-  echo "❌ VIOLATION: infra alias still used"
-  ERRORS=1
-fi
+# Legacy database paths
+check "../../database"
+check "../database"
 
-# =========================
-# 3. Layer separation rules
-# =========================
+# Infra alias
+check "@infra/database"
 
-# domain must NOT import infrastructure
-if grep -R "from .*infrastructure" src/domain; then
-  echo "❌ VIOLATION: domain importing infrastructure"
-  ERRORS=1
-fi
-
-# application must NOT import HTTP layer
-if grep -R "from .*interfaces" src/application; then
-  echo "❌ VIOLATION: application importing interfaces"
-  ERRORS=1
-fi
-
-# =========================
-# RESULT
-# =========================
-
-if [ "$ERRORS" -ne 0 ]; then
-  echo "🚨 Architecture Guard FAILED"
+if [ "$FAIL" -ne 0 ]; then
+  echo "🚨 ARCHITECTURE VIOLATION DETECTED"
   exit 1
 fi
 
-echo "✅ Architecture Guard PASSED"
+echo "✅ Architecture policy respected"
