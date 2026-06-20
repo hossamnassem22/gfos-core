@@ -1,6 +1,6 @@
 export interface User {
-  id: string;
-  name: string;
+  id: number;
   email: string;
-  createdAt: Date;
+  passwordHash: string;
+  role: "USER" | "ADMIN";
 }

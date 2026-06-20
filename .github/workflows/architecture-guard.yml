@@ -1,19 +1,23 @@
-name: Architecture Guard Layer
+name: Architecture Guard (STRICT)
 
 on:
-  pull_request:
   push:
-    branches: [ main, refactor/**, feature/** ]
+  pull_request:
 
 jobs:
-  architecture-guard:
+  guard:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run Architecture Guard
-        run: |
-          chmod +x scripts/guards/architecture-guard.sh
-          bash scripts/guards/architecture-guard.sh
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Verify Architecture Rules (AST Engine)
+        run: deno run --allow-read --allow-env scripts/architecture/engine.ts
+
+      - name: Type Check
+        run: deno check src/main.ts

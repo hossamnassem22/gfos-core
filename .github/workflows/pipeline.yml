@@ -1,44 +1,16 @@
-name: GFOS Enterprise Pipeline (Orchestrator)
-
-on:
-  push:
-    branches: [ main, refactor/**, feature/** ]
-  pull_request:
-    branches: [ main ]
-
+name: Enterprise CI Pipeline
+on: [push]
 jobs:
-
-  # =========================
-  # 1. CODE QUALITY STAGE
-  # =========================
-  quality:
-    uses: ./.github/workflows/quality.yml
-
-  # =========================
-  # 2. TEST STAGE
-  # =========================
   test:
-    needs: quality
-    uses: ./.github/workflows/test-suite.yml
-
-  # =========================
-  # 3. DATABASE SAFETY
-  # =========================
-  db_guard:
-    needs: quality
-    uses: ./.github/workflows/db-guard.yml
-
-  # =========================
-  # 4. SECURITY SCAN
-  # =========================
-  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@v1
+      - name: Run Architecture & Security Tests
+        run: ./run-tests.sh
+  deploy:
     needs: test
-    uses: ./.github/workflows/security.yml
-
-  # =========================
-  # 5. BUILD VALIDATION
-  # =========================
-  build:
-    needs: [test, security]
-    uses: ./.github/workflows/build.yml
-
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build & Push Container
+        run: docker build -f infra/docker/Dockerfile -t gfos-core:latest .

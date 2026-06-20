@@ -1,23 +1,10 @@
-type RouteKey = string;
+import type { FastifyInstance } from "npm:fastify";
+import authRoutes from "./routes/auth.ts";
+import { ledgerRoutes } from "./routes/ledger.ts";
+import { healthRoutes } from "./routes/health.ts";
 
-class RouteRegistry {
-  private routes = new Map<RouteKey, string>();
-
-  register(method: string, path: string, file: string) {
-    const key = `${method.toUpperCase()} ${path}`;
-
-    if (this.routes.has(key)) {
-      throw new Error(
-        `DUPLICATE ROUTE DETECTED:\n${key}\n- ${this.routes.get(key)}\n- ${file}`
-      );
-    }
-
-    this.routes.set(key, file);
-  }
-
-  dump() {
-    return Array.from(this.routes.entries());
-  }
+export async function registerRoutes(app: FastifyInstance) {
+  await authRoutes(app);
+  await ledgerRoutes(app);
+  await healthRoutes(app);
 }
-
-export const routeRegistry = new RouteRegistry();

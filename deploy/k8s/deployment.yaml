@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gfos-core
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gfos-core
+  template:
+    metadata:
+      labels:
+        app: gfos-core
+    spec:
+      containers:
+        - name: gfos-core
+          image: gfos-core:latest
+          ports:
+            - containerPort: 3000

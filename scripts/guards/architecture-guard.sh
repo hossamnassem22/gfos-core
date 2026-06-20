@@ -2,29 +2,43 @@
 
 echo "🧱 Running Architecture Policy Guard..."
 
-POLICY="architecture.policy.json"
+FAILED=0
 
-FAIL=0
+echo "🔍 Checking forbidden db layer usage..."
 
-check() {
-  echo "🔍 Checking: $1"
-  if grep -R "$1" src >/dev/null 2>&1; then
-    echo "❌ Violation detected: $1"
-    grep -R "$1" src
-    FAIL=1
-  fi
-}
+if grep -R "infrastructure/db" src >/dev/null 2>&1; then
+  echo "🚨 FORBIDDEN: infrastructure/db detected"
+  grep -R "infrastructure/db" src
+  FAILED=1
+fi
 
-# Legacy database paths
-check "../../database"
-check "../database"
+echo "🔍 Checking old database paths..."
 
-# Infra alias
-check "@infra/database"
+if grep -R "\.\./\.\./database" src >/dev/null 2>&1; then
+  echo "🚨 FORBIDDEN: old database relative paths"
+  grep -R "\.\./\.\./database" src
+  FAILED=1
+fi
 
-if [ "$FAIL" -ne 0 ]; then
-  echo "🚨 ARCHITECTURE VIOLATION DETECTED"
+echo "🔍 Checking legacy alias usage..."
+
+if grep -R "@infra/database" src >/dev/null 2>&1; then
+  echo "🚨 FORBIDDEN: alias imports"
+  grep -R "@infra/database" src
+  FAILED=1
+fi
+
+echo "🔍 Checking direct db connection misuse..."
+
+if grep -R "db/connection" src >/dev/null 2>&1; then
+  echo "🚨 FORBIDDEN: legacy db connection usage"
+  grep -R "db/connection" src
+  FAILED=1
+fi
+
+if [ $FAILED -eq 1 ]; then
+  echo "❌ ARCHITECTURE FAILED"
   exit 1
 fi
 
-echo "✅ Architecture policy respected"
+echo "✅ Architecture OK"

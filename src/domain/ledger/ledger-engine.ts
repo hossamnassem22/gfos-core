@@ -1,6 +1,6 @@
 import { PoolClient } from 'pg';
 import { v4 as uuid } from 'uuid';
-import { Money, TenantId, UserId, EntryStatus, DebtId, JournalEntryId } from '../../shared/types';
+import { Money, TenantId, UserId, EntryStatus, DebtId, JournalEntryId } from '../../shared/types.ts';
 
 export interface JournalLine {
   accountId: string;

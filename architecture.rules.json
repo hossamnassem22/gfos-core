@@ -1,0 +1,26 @@
+{
+  "layers": {
+    "domain": {
+      "canDependOn": []
+    },
+    "application": {
+      "canDependOn": ["domain"]
+    },
+    "interfaces": {
+      "canDependOn": ["application", "domain"]
+    },
+    "infrastructure": {
+      "canDependOn": ["domain"]
+    }
+  },
+  "forbiddenImports": [
+    {
+      "from": "interfaces",
+      "to": "infrastructure"
+    },
+    {
+      "from": "application",
+      "to": "infrastructure"
+    }
+  ]
+}

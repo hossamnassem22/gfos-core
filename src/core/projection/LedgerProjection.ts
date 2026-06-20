@@ -1,4 +1,4 @@
-import { LedgerPostingEngine } from '../ledger/LedgerPostingEngine';
+import { LedgerPostingEngine } from '../ledger/LedgerPostingEngine.ts';
 
 export class LedgerProjection {
   public static async project(events: FinancialEvent[]) {

@@ -1,15 +1,30 @@
-import { sql } from "../../../infrastructu../../infrastructure/database/connection.ts";
+import { AgreementRepository } from "../ports/AgreementRepository.ts";
+import { SecurityGuard } from "../../application/security/SecurityGuard.ts";
+import { UserContext } from "../context/UserContext.ts";
 
 export class AgreementService {
-  async recordVerifiedPayment(
-    agreementId: string, 
-    amountCents: number, 
-    gatewayProvider: string, 
-    gatewayTxId: string
-  ) {
-    return await sql`
-      INSERT INTO ledger_entries (agreement_id, type, amount_cents, gateway_provider, gateway_tx_id)
-      VALUES (${agreementId}, 'PAYMENT_RECEIVED', ${amountCents}, ${gatewayProvider}, ${gatewayTxId});
-    `;
+  constructor(private repo: AgreementRepository) {}
+
+  async getAgreement(id: string) {
+    SecurityGuard.check("agreement:read");
+
+    const user = UserContext.get();
+
+    const data = await this.repo.findById(id);
+
+    if (!data || data.tenantId !== user.tenantId) {
+      throw new Error("ACCESS_DENIED: tenant mismatch");
+    }
+
+    return data;
+  }
+
+  async listAgreements() {
+    SecurityGuard.check("agreement:read");
+
+    const user = UserContext.get();
+    const list = await this.repo.list();
+
+    return list.filter((x: any) => x.tenantId === user.tenantId);
   }
 }

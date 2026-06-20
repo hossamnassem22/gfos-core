@@ -1,4 +1,4 @@
-import { FinancialEvent } from '../events/FinancialEvents';
+import { FinancialEvent } from '../events/FinancialEvents.ts';
 
 export interface JournalEntry {
   id: string;

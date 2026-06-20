@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getOverdueInstallments } from "../controllers/dashboard";
+import { getOverdueInstallments } from "../controllers/dashboard.ts";
 
 const dashboardRouter = Router();
 

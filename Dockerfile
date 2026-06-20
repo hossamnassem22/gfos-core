@@ -1,16 +1,13 @@
-# استخدام نسخة خفيفة ومستقرة من Node.js
-FROM node:20-alpine
+FROM denoland/deno:1.46.0
 
-# تحديد مسار العمل
 WORKDIR /app
 
-# نسخ ملفات التعريف وتثبيت الاعتمادات
-COPY package*.json ./
-RUN npm install
-
-# نسخ الكود المصدري وبناء المشروع
 COPY . .
-RUN npm run build
 
-# تشغيل التطبيق في بيئة الإنتاج
-CMD ["node", "dist/index.js"]
+ENV DENO_ENV=production
+
+RUN deno cache src/main.ts
+
+EXPOSE 3000
+
+CMD ["run", "--allow-net", "--allow-env", "--allow-read", "src/main.ts"]

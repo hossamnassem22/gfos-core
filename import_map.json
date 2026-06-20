@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "@app/": "./src/",
+    "@domain/": "./src/domain/",
+    "@core/": "./src/core/",
+    "@infra/": "./src/infrastructure/",
+    "@app-services/": "./src/application/services/",
+    "@app-ports/": "./src/application/ports/"
+  }
+}

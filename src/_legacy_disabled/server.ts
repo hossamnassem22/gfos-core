@@ -1,8 +1,8 @@
 import express from 'express';
-import { CommandContextManager } from '../context/CommandContext';
-import { SaleService } from '../services/SaleService';
+import { CommandContextManager } from '../context/CommandContext.ts';
+import { SaleService } from '../services/SaleService.ts';
 // سنفترض وجود instances جاهزة هنا
-// import { eventStore, inventory, debt } from '../app'; 
+// import { eventStore, inventory, debt } from '../app.ts'; 
 
 const app = express();
 app.use(express.json());

@@ -1,5 +1,5 @@
-import { BaseEvent } from '../events/BaseEvent';
-import { SaleRecorded } from '../events/SaleEvents';
+import { BaseEvent } from '../events/BaseEvent.ts';
+import { SaleRecorded } from '../events/SaleEvents.ts';
 
 export class ProfitProjection {
   private dailyProfits: Record<string, number> = {};

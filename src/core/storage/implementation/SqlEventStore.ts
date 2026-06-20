@@ -1,5 +1,5 @@
-import { EventStore, OptimisticLockError } from '../EventStore';
-import { FinancialEvent } from '../../events/FinancialEvents';
+import { EventStore, OptimisticLockError } from '../EventStore.ts';
+import { FinancialEvent } from '../../events/FinancialEvents.ts';
 
 /**
  * هذا الـ Implementation يمثل "الحارس الفعلي" للبيانات.

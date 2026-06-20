@@ -1,7 +1,7 @@
 import { PoolClient } from 'pg';
 import { v4 as uuid } from 'uuid';
-import { Money, TenantId, UserId, DebtId } from '../../shared/types';
-import { LedgerEngine, JournalEntryData } from '../ledger/ledger-engine';
+import { Money, TenantId, UserId, DebtId } from '../../shared/types.ts';
+import { LedgerEngine, JournalEntryData } from '../ledger/ledger-engine.ts';
 
 export interface CreateDebtRequest {
   tenantId: TenantId;

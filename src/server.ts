@@ -1,20 +1,14 @@
-import Fastify from "npm:fastify";
-import cors from "npm:@fastify/cors";
-import { authRoutes } from "./routes/auth.ts";
-import { productRoutes } from "./routes/products.ts";
-import { orderRoutes } from "./routes/orders.ts";
+import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { getDashboardPage } from "./interfaces/web/controllers/dashboard.controller.ts";
 
-const app = Fastify({ logger: false });
-await app.register(cors);
+const app = new Application();
+const router = new Router();
 
-// تسجيل الـ Middleware (التوثيق)
-await app.register(authRoutes);
+router.get("/", async (context) => {
+  context.response.headers.set("Content-Type", "text/html");
+  context.response.body = await getDashboardPage();
+});
 
-// تسجيل المسارات
-await app.register(productRoutes);
-await app.register(orderRoutes);
-
-app.get("/health", () => ({ status: "ok", service: "beautyhub" }));
-
-await app.listen({ port: 3012, host: "0.0.0.0" });
-console.log("BeautyHub API running on port 3012");
+app.use(router.routes());
+console.log("GFOS Enterprise جاهز على http://localhost:8080");
+await app.listen({ port: 8080 });

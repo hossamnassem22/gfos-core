@@ -1,6 +1,6 @@
 import express from 'express';
-import { commandMiddleware } from '../context/CommandContextMiddleware';
-import { recordSaleHandler } from './SaleController';
+import { commandMiddleware } from '../context/CommandContextMiddleware.ts';
+import { recordSaleHandler } from './SaleController.ts';
 
 const app = express();
 app.use(express.json());

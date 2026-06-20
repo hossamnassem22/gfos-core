@@ -7,7 +7,7 @@
  * - Journal Entry Template
  */
 
-import { Money } from '../precision/value-objects';
+import { Money } from '../precision/value-objects.ts';
 
 export interface AccountingMapping {
   debitAccount: {

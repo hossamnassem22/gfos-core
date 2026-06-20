@@ -1,5 +1,5 @@
-import { FinancialEvent } from '../events/FinancialEvents';
-import { FinancialSnapshot } from '../projection/FinancialSnapshot';
+import { FinancialEvent } from '../events/FinancialEvents.ts';
+import { FinancialSnapshot } from '../projection/FinancialSnapshot.ts';
 
 export interface PaymentCommand {
   contractId: string;

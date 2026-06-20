@@ -1,4 +1,4 @@
-import { Money } from '../../shared/Money';
+import { Money } from '../../shared/Money.ts';
 
 export type InstallmentStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'WRITTEN_OFF';
 

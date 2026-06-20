@@ -1,18 +1,21 @@
-import { db } from '../../infrastructure/db/connection';
-import { idempotencyKeys } from '../../infrastructure/db/schema'; // سنضيف هذا الجدول
-import { eq } from 'drizzle-orm';
+import type { IDatabasePort } from "../ports/database.port.ts";
 
 export class IdempotencyEngine {
-  async ensureUnique(key: string, action: () => Promise<void>): Promise<void> {
-    const existing = await db.select().from(idempotencyKeys).where(eq(idempotencyKeys.key, key));
-    
-    if (existing.length > 0) {
-      console.warn("⚠️ تم اكتشاف طلب متكرر! سيتم تجاهله:", key);
-      return; // العملية نُفذت سابقاً
-    }
+  constructor(private db: IDatabasePort) {}
 
-    await action(); // تنفيذ العملية المالية
-    
-    await db.insert(idempotencyKeys).values({ key, createdAt: new Date() });
+  async isDuplicate(key: string) {
+    const rows = await this.db.query(
+      "SELECT * FROM idempotency_keys WHERE key = ?",
+      [key],
+    );
+
+    return rows.length > 0;
+  }
+
+  async saveKey(key: string) {
+    await this.db.execute(
+      "INSERT INTO idempotency_keys (key) VALUES (?)",
+      [key],
+    );
   }
 }

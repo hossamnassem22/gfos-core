@@ -1,29 +1,35 @@
-import { OverdueEngine } from "@app/services/OverdueEngine.ts";
-import { NotificationEngine } from "@app/services/NotificationEngine.ts";
+import { NotificationEngine } from "../../application/services/NotificationEngine.ts";
+import { OverdueEngine } from "../../application/services/OverdueEngine.ts";
+import { pool } from "../database/connection.ts";
 
-function msUntil(hour: number, minute: number): number {
-  const now = new Date();
-  const next = new Date();
-  next.setHours(hour, minute, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1);
-  return next.getTime() - now.getTime();
-}
+export async function scheduleOverdueNotifications() {
+  const client = await pool.connect();
 
-export function startOverdueScheduler() {
-  async function run() {
-    console.log(`[Scheduler] Running at ${new Date().toISOString()}`);
-    try {
-      const overdueResult = await OverdueEngine.process({ dryRun: false });
-      console.log(`[Scheduler] OverdueEngine:`, overdueResult);
-      const notifResult = await NotificationEngine.process();
-      console.log(`[Scheduler] Notifications: created=${notifResult.created} skipped=${notifResult.skipped}`);
-    } catch (err) {
-      console.error(`[Scheduler] Error:`, err);
+  try {
+    const r = await client.query(`
+      SELECT id, customer_id, status
+      FROM debt_agreements
+      WHERE status = 'OVERDUE'
+    `);
+
+    for (const row of r.rows) {
+      await NotificationEngine.notify({
+        customerId: row.customer_id,
+        debtId: row.id,
+        type: "OVERDUE",
+        title: "Overdue Payment",
+        body: "A debt agreement is overdue",
+      });
+
+      await OverdueEngine.process(row.id);
     }
-    setTimeout(run, msUntil(0, 5));
-  }
 
-  const delay = msUntil(0, 5);
-  console.log(`[Scheduler] Next run in ${Math.round(delay / 60000)} minutes`);
-  setTimeout(run, delay);
+    if (r.rows.length > 0) {
+      console.log(`📬 ${r.rows.length} overdue agreements processed`);
+    }
+  } catch (e) {
+    console.error("scheduler error:", e);
+  } finally {
+    client.release();
+  }
 }

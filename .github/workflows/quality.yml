@@ -1,0 +1,24 @@
+name: Quality Check
+
+on:
+  workflow_call:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Deno check
+        run: deno check src/main.ts
+
+      - name: Lint-style safety check
+        run: |
+          echo "Checking forbidden patterns..."
+          grep -R "\.\./\.\./database" src && exit 1 || true
+          grep -R "@infra/database" src && exit 1 || true

@@ -1,0 +1,21 @@
+{
+  "orders": [
+    {
+      "id": "PROD-LIVE-001",
+      "retailerName": "التاجر الأول",
+      "factoryName": "المصنع المورد",
+      "product": "بضاعة تجريبية",
+      "quantity": 1,
+      "status": "PENDING"
+    }
+  ],
+  "audit": [
+    {
+      "transactionId": "PROD-LIVE-001",
+      "timestamp": "2026-06-20T03:56:27.617Z",
+      "retailerName": "التاجر الأول",
+      "factoryName": "المصنع المورد",
+      "agreementStatus": "VERIFIED"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { LedgerPostingService } from '../services/LedgerPostingService';
+import { LedgerPostingService } from '../services/LedgerPostingService.ts';
 
 export class PenaltyEngine {
   constructor(private ledger: LedgerPostingService) {}

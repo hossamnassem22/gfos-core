@@ -1,0 +1,16 @@
+name: Enterprise CI Pipeline
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Run Strict Integrity Tests
+        run: deno test --allow-all src/tests/
+      - name: Run Architecture Guard Check
+        run: deno run --allow-read src/tests/architecture/Guard.ts

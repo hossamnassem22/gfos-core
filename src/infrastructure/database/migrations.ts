@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { getClient } from './connection';
+import { getClient } from './connection.ts';
 
 async function runMigrations() {
   const client = await getClient();

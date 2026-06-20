@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  title: Selfni-Core Enterprise API
+  version: 1.0.0
+paths:
+  /transactions:
+    post:
+      summary: سجل عملية مالية جديدة
+  /settlement:
+    get:
+      summary: استرجاع سجل التسويات المالية

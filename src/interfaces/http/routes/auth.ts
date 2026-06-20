@@ -1,31 +1,23 @@
-import { FastifyInstance } from "npm:fastify";
-import { AuthService } from "../../infrastructure/auth/AuthService.ts";
+import { TokenService } from "../../../core/TokenService.ts";
+import { LoginUseCase } from "../../../application/auth/usecases/login.ts";
 
-const authService = new AuthService();
+export default async function authRoutes(app: any) {
+  const login = new LoginUseCase();
+  const token = new TokenService(Deno.env.get("JWT_SECRET")!);
 
-export async function authRoutes(app: FastifyInstance) {
+  app.post("/auth/login", async (req: any, rep: any) => {
+    const { email, password } = req.body ?? {};
 
-  app.post("/auth/register", async (req, reply) => {
-    const { username, email, password } = req.body as any;
-    if (!username || !email || !password)
-      return reply.status(400).send({ error: "بيانات ناقصة" });
-    try {
-      const token = await authService.register(username, email, password);
-      return { token, message: "تم التسجيل بنجاح" };
-    } catch (e: any) {
-      return reply.status(400).send({ error: e.message });
-    }
-  });
+    const user = await login.execute(email, password);
+    if (!user) return rep.code(401).send({ error: "INVALID_CREDENTIALS" });
 
-  app.post("/auth/login", async (req, reply) => {
-    const { email, password } = req.body as any;
-    if (!email || !password)
-      return reply.status(400).send({ error: "بيانات ناقصة" });
-    try {
-      const token = await authService.login(email, password);
-      return { token, message: "تم تسجيل الدخول بنجاح" };
-    } catch (e: any) {
-      return reply.status(401).send({ error: e.message });
-    }
+    const accessToken = await token.signAccess(user);
+    const refreshToken = await token.signRefresh(user);
+
+    return rep.code(200).send({
+      user,
+      accessToken,
+      refreshToken,
+    });
   });
 }

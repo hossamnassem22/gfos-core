@@ -1,5 +1,5 @@
-import { Money } from '../../domain/shared/Money';
-import { LedgerPostingService } from '../services/LedgerPostingService';
+import { Money } from '../../domain/shared/Money.ts';
+import { LedgerPostingService } from '../services/LedgerPostingService.ts';
 
 export class InterestEngine {
   constructor(private ledger: LedgerPostingService) {}

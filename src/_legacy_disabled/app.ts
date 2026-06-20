@@ -1,9 +1,9 @@
 import express from 'express';
-import { commandMiddleware } from './middleware/CommandMiddleware';
-import { SaleService } from './services/SaleService';
-import { InMemoryEventStore } from './infrastructure/InMemoryEventStore';
-import { InventoryProjection } from './projections/InventoryProjection';
-import { DebtProjection } from './projections/DebtProjection';
+import { commandMiddleware } from './middleware/CommandMiddleware.ts';
+import { SaleService } from './services/SaleService.ts';
+import { InMemoryEventStore } from './infrastructure/InMemoryEventStore.ts';
+import { InventoryProjection } from './projections/InventoryProjection.ts';
+import { DebtProjection } from './projections/DebtProjection.ts';
 
 const app = express();
 app.use(express.json());

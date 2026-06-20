@@ -1,4 +1,4 @@
-import { DomainEvent } from "../../domain/events/DomainEvent";
+import { DomainEvent } from "../../domain/events/DomainEvent.ts";
 
 export class EventStore {
   private events: DomainEvent[] = [];

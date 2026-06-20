@@ -1,6 +1,6 @@
 import { MongoClient, Collection } from 'mongodb';
-import { BaseEvent } from '../events/BaseEvent';
-import { IEventStore } from './EventStore';
+import { BaseEvent } from '../events/BaseEvent.ts';
+import { IEventStore } from './EventStore.ts';
 
 export class MongoEventStore implements IEventStore {
   private collection: Collection;

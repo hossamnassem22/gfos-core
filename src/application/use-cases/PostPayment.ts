@@ -1,5 +1,5 @@
-import { JournalEntry, JournalLine } from '../../domain/ledger/JournalEntry';
-import { Money } from '../../domain/ledger/Money';
+import { JournalEntry, JournalLine } from '../../domain/ledger/JournalEntry.ts';
+import { Money } from '../../domain/ledger/Money.ts';
 
 export class PostPayment {
   static execute(

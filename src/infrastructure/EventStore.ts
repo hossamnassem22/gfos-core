@@ -1,4 +1,4 @@
-import { BaseEvent } from '../events/BaseEvent';
+import { BaseEvent } from '../events/BaseEvent.ts';
 
 export interface IEventStore {
   append(event: BaseEvent): Promise<void>;

@@ -1,13 +1,17 @@
-import { eq } from 'drizzle-orm';
-import { journalEntries } from '../../infrastructure/db/schema';
-import { db } from '../../infrastructure/database/connection';
+import type { IDatabasePort } from "../ports/database.port.ts";
 
 export class AccountStatement {
-  async generateStatement(tenantId: string, _customerId: string) {
-    // جلب كشف حساب لمستأجر محدد
-    return await db
-      .select()
-      .from(journalEntries)
-      .where(eq(journalEntries.tenantId, tenantId));
+  constructor(private db: IDatabasePort) {}
+
+  async getStatement(accountId: string) {
+    const transactions = await this.db.query(
+      "SELECT * FROM journal_entries WHERE account_id = ? ORDER BY created_at DESC",
+      [accountId],
+    );
+
+    return {
+      accountId,
+      transactions,
+    };
   }
 }
