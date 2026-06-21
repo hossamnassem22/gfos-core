@@ -1,17 +1,13 @@
 {
   "name": "gfos-core",
   "version": "1.0.0",
+  "description": "GFOS Platform — Multi-tenant marketplace + banking core (Deno + PostgreSQL)",
+  "private": true,
   "scripts": {
-    "test": "deno test --allow-all",
-    "lint": "deno lint",
-    "build": "deno bundle src/main.ts dist/bundle.js",
-    "start": "deno run --allow-net --allow-read src/server.ts"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "ts-morph": "^28.0.0"
-  },
-  "devDependencies": {
-    "eslint": "^10.5.0"
+    "start": "deno task start",
+    "dev": "deno task dev",
+    "test": "deno task test",
+    "lint": "deno task lint",
+    "fmt": "deno task fmt"
   }
 }
