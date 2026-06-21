@@ -1,3 +1,0 @@
-name: financial-topos
-depend: cubical
-include: src

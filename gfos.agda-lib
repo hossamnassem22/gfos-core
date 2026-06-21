@@ -1,3 +1,0 @@
-name: gfos
-depend: cubical
-include: src
