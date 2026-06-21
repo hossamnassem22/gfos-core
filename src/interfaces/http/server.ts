@@ -581,6 +581,15 @@ async function handle(req: Request): Promise<Response> {
     return new Response(HTML, { headers: { "content-type": "text/html; charset=utf-8" } });
   }
 
+  if (path === "/merchant" || path === "/merchant.html") {
+    try {
+      const html = await Deno.readTextFile("./frontend/merchant.html");
+      return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
+    } catch {
+      return Response.json({ error: "merchant.html not found" }, { status: 404, headers: jsonHeaders });
+    }
+  }
+
   if (path === "/health") return Response.json({ status: "ok", time: new Date().toISOString() }, { headers: jsonHeaders });
 
   if (path === "/auth/login" && method === "POST") {
