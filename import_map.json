@@ -3,8 +3,15 @@
     "@app/": "./src/",
     "@domain/": "./src/domain/",
     "@core/": "./src/core/",
+    "@kernel/": "./src/kernel/",
     "@infra/": "./src/infrastructure/",
+    "@interfaces/": "./src/interfaces/",
     "@app-services/": "./src/application/services/",
-    "@app-ports/": "./src/application/ports/"
+    "@app-ports/": "./src/application/ports/",
+    "@app-engines/": "./src/application/engines/",
+    "@app-usecases/": "./src/application/use-cases/",
+    "@libs/": "./libs/",
+    "@shared/": "./shared/",
+    "@services/": "./services/"
   }
 }

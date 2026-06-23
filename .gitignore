@@ -1,3 +1,47 @@
+# Node / npm
 node_modules/
-deno.lock
+package-lock.json
 npm-debug.log
+yarn-error.log
+
+# Deno
+.deno/
+deno.lock
+deno_dir/
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs and runtime data
+logs/*.log
+logs/logfile
+*.log
+
+# Local env
+.env
+.env.local
+.env.*.local
+
+# Backups (kept under backups/ but not duplicated)
+*.sql.bak
+
+# Test artifacts
+coverage/
+.nyc_output/
+
+# OS temp
+tmp/
+.tmp/
+
+# Archives (kept but heavy)
+archive/

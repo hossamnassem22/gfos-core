@@ -1,17 +1,43 @@
 {
   "name": "gfos-core",
-  "version": "1.0.0",
+  "version": "0.5.0",
+  "description": "Global Financial Operations Platform — debt management, payments, installments, ledger accounting, multi-tenant SaaS.",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "src/main.ts",
   "scripts": {
-    "test": "deno test --allow-all",
-    "lint": "deno lint",
-    "build": "deno bundle src/main.ts dist/bundle.js",
-    "start": "deno run --allow-net --allow-read src/server.ts"
+    "dev": "deno task dev",
+    "start": "deno task start",
+    "test": "deno task test",
+    "test:kernel": "deno task test:kernel",
+    "test:domain": "deno task test:domain",
+    "test:app": "deno task test:app",
+    "test:infra": "deno task test:infra",
+    "lint": "deno task lint",
+    "fmt": "deno task fmt",
+    "fmt:check": "deno task fmt:check",
+    "check": "deno task check",
+    "typecheck": "deno task typecheck",
+    "arch:check": "deno task arch:check",
+    "arch:full": "deno task arch:full",
+    "uat": "deno task uat",
+    "build": "deno task build",
+    "db:migrate": "psql -d gfos -f db/schema.sql",
+    "db:backup": "bash scripts/sh/backup-main.sh",
+    "db:reset": "bash scripts/sh/cleanup.sh",
+    "start:all": "bash scripts/sh/start.sh",
+    "stop:all": "bash scripts/sh/stop.sh",
+    "install:env": "bash scripts/sh/install.sh"
+  },
+  "engines": {
+    "deno": ">=1.40",
+    "node": ">=20"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "ts-morph": "^28.0.0"
+    "bcryptjs": "^3.0.3"
   },
   "devDependencies": {
-    "eslint": "^10.5.0"
+    "typescript": "^5.4.0"
   }
 }
