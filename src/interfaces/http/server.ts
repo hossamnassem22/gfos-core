@@ -1,4 +1,5 @@
-import { sql } from "../../infrastructure/db/connection.ts";
+import { sql } from "../../infrastructure/database/connection.ts";
+import * as mp from "./routes/marketplace.ts";
 
 async function verifyToken(req: Request): Promise<{ userId: string } | null> {
   const auth = req.headers.get("Authorization") ?? "";
@@ -580,6 +581,15 @@ async function handle(req: Request): Promise<Response> {
     return new Response(HTML, { headers: { "content-type": "text/html; charset=utf-8" } });
   }
 
+  if (path === "/merchant" || path === "/merchant.html") {
+    try {
+      const html = await Deno.readTextFile("./frontend/merchant.html");
+      return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
+    } catch {
+      return Response.json({ error: "merchant.html not found" }, { status: 404, headers: jsonHeaders });
+    }
+  }
+
   if (path === "/health") return Response.json({ status: "ok", time: new Date().toISOString() }, { headers: jsonHeaders });
 
   if (path === "/auth/login" && method === "POST") {
@@ -744,6 +754,26 @@ async function handle(req: Request): Promise<Response> {
   if (path === "/auth/logout" && method === "POST") {
     return Response.json({ ok: true }, { headers: jsonHeaders });
   }
+
+  // ── Marketplace Routes (Merchants / Products / Orders / Reviews) ──
+  if (path === "/api/merchants/register" && method === "POST") return mp.registerMerchant(req);
+  if (path === "/api/merchants/login" && method === "POST") return mp.loginMerchant(req);
+  if (path === "/api/merchants/me" && method === "GET") return mp.getMyMerchant(req);
+  if (path === "/api/merchants/me" && method === "PUT") return mp.updateMyMerchant(req);
+  if (path === "/api/merchants/me/dashboard" && method === "GET") return mp.getMerchantDashboard(req);
+  if (path === "/api/merchants/me/products" && method === "GET") return mp.getMyProducts(req);
+  if (path === "/api/merchants/me/orders" && method === "GET") return mp.getMyOrders(req);
+  if (path === "/api/categories" && method === "GET") return mp.listCategories(req);
+  if (path === "/api/products" && method === "GET") return mp.listProducts(req);
+  if (path === "/api/products" && method === "POST") return mp.createProduct(req);
+  if (path.startsWith("/api/products/") && method === "GET") return mp.getProduct(req, path.split("/")[3]);
+  if (path.startsWith("/api/products/") && method === "PUT") return mp.updateProduct(req, path.split("/")[3]);
+  if (path.startsWith("/api/products/") && method === "DELETE") return mp.deleteProduct(req, path.split("/")[3]);
+  if (path === "/api/orders" && method === "POST") return mp.createOrder(req);
+  if (path.startsWith("/api/orders/") && method === "GET") return mp.getOrder(req, path.split("/")[3]);
+  if (path.match(/^\/api\/orders\/[\w-]+\/status$/) && method === "PUT") return mp.updateOrderStatus(req, path.split("/")[3]);
+  if (path === "/api/reviews" && method === "POST") return mp.createReview(req);
+  if (path.match(/^\/api\/reviews\/[\w-]+\/reply$/) && method === "POST") return mp.replyToReview(req, path.split("/")[3]);
 
   return Response.json({ error: "not found" }, { status: 404, headers: jsonHeaders });
 }
