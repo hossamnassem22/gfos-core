@@ -395,3 +395,8 @@ MIT — see [LICENSE](LICENSE)
 ---
 
 Built with ❤️ for the Egyptian and Arabic-speaking markets.
+
+## الهيكل الحالي
+- `src/core/` → Financial Engines
+- `src/domain/` → Business Entities
+- `src/application/` → Use Cases

@@ -351,7 +351,7 @@ async function doLogin() {
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('user-info').textContent = username;
-  loadDashboard();
+  loadDashboard().catch(e => console.error('Dashboard error:', e));
 }
 
 function doLogout() {
@@ -607,7 +607,7 @@ async function handle(req: Request): Promise<Response> {
   const auth = req.headers.get("Authorization") ?? "";
   const token = auth.replace("Bearer ", "");
   let tenantId = "1";
-  try { const [,p] = token.split("."); tenantId = String(JSON.parse(atob(p)).sub ?? "1"); } catch {}
+  try { const [,p] = token.split("."); const parsed = JSON.parse(atob(p)); tenantId = String(parsed.sub ?? parsed.userId ?? "1"); } catch {}
 
   if (path === "/analytics/summary") {
     const [ph] = await sql`SELECT COUNT(DISTINCT d.id) AS total_debts, COUNT(DISTINCT d.id) FILTER (WHERE d.status='ACTIVE') AS active_debts, COALESCE(SUM(d.principal_cents),0) AS total_principal_cents, COUNT(s.id) FILTER (WHERE s.status='OVERDUE') AS overdue_installments, COUNT(s.id) FILTER (WHERE s.status='PENDING') AS pending_installments, COUNT(s.id) FILTER (WHERE s.status='PAID') AS paid_installments, COALESCE(SUM(s.total_payment_cents) FILTER (WHERE s.status='OVERDUE'),0) AS overdue_amount_cents FROM debt_agreements d LEFT JOIN amortization_schedule s ON s.debt_id = d.id WHERE d.user_id = ${tenantId}`;
@@ -665,24 +665,6 @@ async function handle(req: Request): Promise<Response> {
 
 
   // ── Customers Portfolio ─────────────────────────────
-  if (path === "/customers/portfolio") {
-    const rows = await sql`
-      SELECT c.id, c.name, c.phone, c.national_id, c.created_at,
-        COUNT(d.id) AS debt_count,
-        COALESCE(SUM(d.principal_cents),0) AS total_principal_cents,
-        COUNT(s.id) FILTER (WHERE s.status='OVERDUE') AS overdue_installments,
-        COALESCE(SUM(s.total_payment_cents) FILTER (WHERE s.status='OVERDUE'),0) AS overdue_amount_cents,
-        COUNT(s.id) FILTER (WHERE s.status='PAID') AS paid_installments,
-        COUNT(s.id) FILTER (WHERE s.status='PENDING') AS pending_installments
-      FROM customers c
-      LEFT JOIN debt_agreements d ON d.customer_id = c.id AND d.user_id = ${tenantId}
-      LEFT JOIN amortization_schedule s ON s.debt_id = d.id
-      WHERE c.tenant_id = ${tenantId}
-      GROUP BY c.id, c.name, c.phone, c.national_id, c.created_at
-      ORDER BY c.name
-    `;
-    return Response.json(rows, { headers: jsonHeaders });
-  }
 
   // ── Statement ────────────────────────────────────────
   if (path.match(/^\/statement\/customer\/[\w-]+$/) && method === "GET") {

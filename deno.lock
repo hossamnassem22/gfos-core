@@ -5,20 +5,30 @@
     "jsr:@std/assert@*": "1.0.19",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/bytes@1": "1.0.6",
+    "jsr:@std/cli@^1.0.30": "1.0.30",
     "jsr:@std/crypto@1": "1.1.0",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
+    "jsr:@std/fmt@^1.0.10": "1.0.10",
+    "jsr:@std/fs@^1.0.24": "1.0.24",
+    "jsr:@std/html@^1.0.7": "1.0.7",
+    "jsr:@std/http@*": "1.1.1",
     "jsr:@std/http@1": "1.1.1",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/media-types@1": "1.1.0",
+    "jsr:@std/media-types@^1.1.0": "1.1.0",
+    "jsr:@std/net@^1.0.6": "1.0.6",
     "jsr:@std/path@1": "1.1.5",
+    "jsr:@std/path@^1.1.5": "1.1.5",
+    "jsr:@std/streams@^1.1.1": "1.1.1",
     "npm:@fastify/jwt@*": "10.1.0",
     "npm:fastify@*": "5.8.5",
     "npm:jsonwebtoken@*": "9.0.3",
     "npm:nodemailer@*": "8.0.10",
     "npm:path-to-regexp@^6.3.0": "6.3.0",
-    "npm:pg@*": "8.21.0",
+    "npm:pg@*": "8.22.0",
+    "npm:pg@^8.22.0": "8.22.0",
     "npm:postgres@*": "3.4.9"
   },
   "jsr": {
@@ -29,8 +39,8 @@
         "jsr:@std/bytes",
         "jsr:@std/crypto",
         "jsr:@std/encoding@1",
-        "jsr:@std/http",
-        "jsr:@std/media-types"
+        "jsr:@std/http@1",
+        "jsr:@std/media-types@1"
       ]
     },
     "@std/assert@1.0.19": {
@@ -42,16 +52,36 @@
     "@std/bytes@1.0.6": {
       "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
     },
+    "@std/cli@1.0.30": {
+      "integrity": "769446536522d0417d7127ebcabcafac1ab0ce6766d0eb3fca1d36326fe98d13"
+    },
     "@std/crypto@1.1.0": {
       "integrity": "b8d6d0a6377a32b213af2661ed7bf1062d94feac0c57def5526a8e74a95c3ec8"
     },
     "@std/encoding@1.0.10": {
       "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
     },
+    "@std/fmt@1.0.10": {
+      "integrity": "90dfba288802ac6de82fb31d0917eb9e4450b9925b954d5e51fc29ac07419db5"
+    },
+    "@std/fs@1.0.24": {
+      "integrity": "f3061b45b81673a2bece689da041df32d174be064c89eb6397fb5718d3fb7877"
+    },
+    "@std/html@1.0.7": {
+      "integrity": "175c818905a6e75743c69c251395e273d82698e58cfe7dd76268d70e28b8d8fe"
+    },
     "@std/http@1.1.1": {
       "integrity": "e343a9a80aea07c716b91be5c79df764144430ad2dd7c9121ed7443f08dc74f7",
       "dependencies": [
-        "jsr:@std/encoding@^1.0.10"
+        "jsr:@std/cli",
+        "jsr:@std/encoding@^1.0.10",
+        "jsr:@std/fmt",
+        "jsr:@std/fs",
+        "jsr:@std/html",
+        "jsr:@std/media-types@^1.1.0",
+        "jsr:@std/net",
+        "jsr:@std/path@^1.1.5",
+        "jsr:@std/streams"
       ]
     },
     "@std/internal@1.0.14": {
@@ -60,11 +90,17 @@
     "@std/media-types@1.1.0": {
       "integrity": "c9d093f0c05c3512932b330e3cc1fe1d627b301db33a4c2c2185c02471d6eaa4"
     },
+    "@std/net@1.0.6": {
+      "integrity": "110735f93e95bb9feb95790a8b1d1bf69ec0dc74f3f97a00a76ea5efea25500c"
+    },
     "@std/path@1.1.5": {
       "integrity": "ccea00982ea28c36becaf6e62f855406c76a8c32d462f66f415bbb7d83a271bc",
       "dependencies": [
         "jsr:@std/internal@^1.0.14"
       ]
+    },
+    "@std/streams@1.1.1": {
+      "integrity": "92556d350e537e9dce527a6d08f6f15be3ff65e656079dea69d15252187c7613"
     }
   },
   "npm": {
@@ -369,20 +405,20 @@
     "pg-cloudflare@1.4.0": {
       "integrity": "sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A=="
     },
-    "pg-connection-string@2.13.0": {
-      "integrity": "sha512-EMnU9E2fSULdsbErBbMaXJvFeD9B4+nPcM3f+4lsiCR0BHLPrLVjv3DbyM2hgQQviKJaTWIRRTjKjWlHg3p2ig=="
+    "pg-connection-string@2.14.0": {
+      "integrity": "sha512-XwWDGcLRGCXAR8F/AM5bG7Q+A3Wm2s6QeEjlOKZLlH3UYcguiqCWKyWXVag5TLTIjR7oOJUY8kcADaZgWPyLeg=="
     },
     "pg-int8@1.0.1": {
       "integrity": "sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw=="
     },
-    "pg-pool@3.14.0_pg@8.21.0": {
+    "pg-pool@3.14.0_pg@8.22.0": {
       "integrity": "sha512-gKtPkFdQPU3DksooVLi9LsjZxrsBUZIpa+7aVx+LV5pNh0KzP4Zleud2po+ConrxbuXGBJ6Hfer6hdgpIBpBaw==",
       "dependencies": [
         "pg"
       ]
     },
-    "pg-protocol@1.14.0": {
-      "integrity": "sha512-n5taZ1kO3s9ngDTVxsEznOqCyToTgz0FLuPq0B33COy5pPpuWJpY3/2oRBVETuOgzdqRXfWpM9HIhp2LBBT1BA=="
+    "pg-protocol@1.15.0": {
+      "integrity": "sha512-cq9sECI5s0+uPUXjbz8ioyPJni6RzsRib0US67i5IoTZKw8fNeYlVE7u8F4dG7vEJJtc5wdD1K189lCCUwqWTQ=="
     },
     "pg-types@2.2.0": {
       "integrity": "sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==",
@@ -394,8 +430,8 @@
         "postgres-interval"
       ]
     },
-    "pg@8.21.0": {
-      "integrity": "sha512-AUP1EYJuHraQGsVoCQVIcM7TEJVGtDzxWtGFZd8rds9d+CCXlU5Js1rYgfLNvxy9iJrpHjGrRjoi/3BT9fRyiA==",
+    "pg@8.22.0": {
+      "integrity": "sha512-8wih1vVIBMxoUM2oB4soJsD9tDnDpLv4OXBJ+EJzFsvycD+lfyIreC2gGHq78f8jbLLt+bvlPTFdFZfJkOuzAA==",
       "dependencies": [
         "pg-connection-string",
         "pg-pool",
@@ -937,5 +973,12 @@
     "https://deno.land/x/postgres@v0.19.3/query/transaction.ts": "8f4eef68f8e9b4be216199404315e6e08fe1fe98afb2e640bffd077662f79678",
     "https://deno.land/x/postgres@v0.19.3/utils/deferred.ts": "5420531adb6c3ea29ca8aac57b9b59bd3e4b9a938a4996bbd0947a858f611080",
     "https://deno.land/x/postgres@v0.19.3/utils/utils.ts": "ca47193ea03ff5b585e487a06f106d367e509263a960b787197ce0c03113a738"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:pg@^8.22.0"
+      ]
+    }
   }
 }

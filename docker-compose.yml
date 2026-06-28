@@ -1,13 +1,23 @@
 services:
   app:
     build: .
+    ports:
+      - "3011:3011"
     environment:
       - DATABASE_URL=postgres://user:password@db:5432/gfos_db
     depends_on:
       - db
+    volumes:
+      - .:/app
   db:
     image: postgres:15
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=gfos_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

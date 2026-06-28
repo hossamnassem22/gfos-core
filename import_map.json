@@ -1,10 +1,10 @@
 {
   "imports": {
-    "@app/": "./src/",
-    "@domain/": "./src/domain/",
     "@core/": "./src/core/",
-    "@infra/": "./src/infrastructure/",
-    "@app-services/": "./src/application/services/",
-    "@app-ports/": "./src/application/ports/"
+    "@domain/": "./src/domain/",
+    "@application/": "./src/application/",
+    "@infrastructure/": "./src/infrastructure/",
+    "@interfaces/": "./src/interfaces/",
+    "@shared/": "./shared/"
   }
 }

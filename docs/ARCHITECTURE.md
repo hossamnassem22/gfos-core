@@ -1,28 +1,27 @@
-# المعمارية الرياضية للـ Financial Topos Kernel
+# Architecture
 
-## 1. الفلسفة الأساسية
-يعتمد هذا النظام على مبدأ أن **المالية هي هندسة للأحداث عبر الزمن**. بدلاً من تمثيل البيانات كسجلات ثابتة في جداول (Tables)، نمثلها كـ **Functors** تنقلنا بين سياقات زمنية (Objects في الفئة `C`)، مما يجعل النظام توبولوجياً متسقاً بالضرورة.
+## Stack
+- Runtime:  Deno/TypeScript
+- HTTP:     Fastify (port 3011)
+- Database: PostgreSQL
+- Auth:     JWT
+- Frontend: HTML/JS port 5173
 
-## 2. الطبقات المعمارية (Layers)
+## الطبقات
+Frontend -> Fastify API -> Application -> Domain/Core -> Infrastructure/PostgreSQL
 
-### أ. الطبقة التأسيسية (The Site: Δ)
-تمثل الفئة `C` (أو `Δ` كفئة تمثيلية) هيكل النظام المالي. كل `Object` يمثل "لحظة زمنية" أو "سياق مالي"، وكل `Morphism` يمثل "تحويل قيمة" أو "معاملة".
+## دورة حياة القسط
+دين -> AmortizationEngine -> PENDING -> OverdueEngine -> OVERDUE -> InstallmentOverdue Event -> Dashboard
 
-### ب. طبقة السجلات (The Presheaf Topos: PShCat)
-بناءً على التوبوس الأساسي، نعرّف السجل كـ `Presheaf`. هذا يعني أننا لا نخزن "الحالة الحالية" فقط، بل "تاريخ المعاملات الكامل" المتوافق مع سياق الفئة المالية.
+## Tenant Isolation
+- user_id في كل جدول
+- JWT يحمل userId
+- customers.tenant_id
 
-### ج. محرك التسوية (Reconciliation Engine)
-يعمل المحرك كـ `Natural Transformation` (تحويل طبيعي):
-- **المدخل:** سجل مالي خام (Raw Ledger State).
-- **العملية:** تطبيق `Audit Functor` الذي يضمن إسقاط السجل إلى "فضاء الاتساق".
-- **المخرج:** سجل متسق يحقق شروط الـ `Sheaf` (بمعنى أن المعلومات المالية موحدة ومستقرة عالمياً).
+## Money
+- bigint millimes فقط
+- لا floating point
 
-
-
-## 3. القوانين الرياضية (The Laws)
-نحن لا نعتمد على الاختبارات التقليدية (Unit tests) فقط، بل نعتمد على **القوانين الصورية (Formal Laws)**:
-1. **Idempotency (قانون الاستقرار):** `audit ∘ audit ≅ audit`. التدقيق المتكرر لا يغير الحالة المالية المستقرة.
-2. **Lex Preservation:** الحفاظ على المحدودات (Finite Limits) يضمن أن التحويلات المالية لا تفقد "جوهر القيمة" أو تسبب تناقضات.
-
-## 4. المسار المستقبلي
-الهدف النهائي هو بناء نظام `∞-Topos` حيث يتم التحقق من كل معاملة مالية (Transaction) كـ `Morphism` يحافظ على التماثل (Homotopy Invariance) بين سجلات الحسابات، مما يمنع التلاعب المالي برمجياً.
+## Events
+- financial_events jsonb payload
+- Idempotency UNIQUE constraint
