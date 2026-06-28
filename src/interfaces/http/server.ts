@@ -1,5 +1,6 @@
 import { sql } from "../../infrastructure/database/connection.ts";
-import * as mp from "./routes/marketplace.ts";
+// marketplace disabled
+const mp: any = {};
 
 async function verifyToken(req: Request): Promise<{ userId: string } | null> {
   const auth = req.headers.get("Authorization") ?? "";
