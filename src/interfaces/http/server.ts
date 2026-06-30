@@ -475,9 +475,37 @@ async function addCustomer() {
 }
 
 async function viewCustomer(id) {
-  const data = await api('/customers/'+id);
+  const data = await api('/statement/customer/'+id);
   if (!data) return;
-  alert('العميل: '+data.customer.name+'\\nالديون: '+data.debts.length);
+  const s = data.summary;
+  const movements = [
+    ...(data.debts||[]).map(d => ({ type:'DEBT', description:'دين جديد', date:d.created_at, debitCents:d.principal_cents, creditCents:0 })),
+    ...(data.payments||[]).map(p => ({ type:'PAYMENT', description:'دفعة مستلمة', date:p.paid_at, debitCents:0, creditCents:p.amount_cents }))
+  ].sort((a,b)=> new Date(a.date) - new Date(b.date));
+  const movementsHtml = movements.map(m => {
+    const isDebit = m.type === 'DEBT';
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px">' +
+      '<div>' + m.description + '<div style="color:var(--text2);font-size:11px">' + fmtDate(m.date) + '</div></div>' +
+      '<div style="font-weight:700;color:' + (isDebit?'var(--danger)':'var(--success)') + '">' +
+        (isDebit ? '+' : '-') + fmt(isDebit ? m.debitCents : m.creditCents) +
+      '</div></div>';
+  }).join('') || '<div style="color:var(--text2);font-size:13px;text-align:center;padding:20px">لا توجد حركات</div>';
+
+  document.getElementById('modal-cust-name').textContent = 'كشف حساب — ' + data.customer.name;
+  document.getElementById('modal-body').innerHTML =
+    '<div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px">' +
+      '<div class="kpi-card"><div class="kpi-label">إجمالي الأصل</div><div class="kpi-value">' + fmt(s.totalPrincipalCents) + '</div></div>' +
+      '<div class="kpi-card success"><div class="kpi-label">المدفوع</div><div class="kpi-value">' + fmt(s.totalPaidCents) + '</div></div>' +
+      '<div class="kpi-card"><div class="kpi-label">المتبقي</div><div class="kpi-value">' + fmt(s.remainingCents) + '</div></div>' +
+      '<div class="kpi-card danger"><div class="kpi-label">أقساط متأخرة</div><div class="kpi-value">' + s.overdueInstallments + '</div></div>' +
+    '</div>' +
+    '<h4 style="margin-bottom:8px;font-size:14px">سجل الحركات</h4>' +
+    movementsHtml;
+  document.getElementById('cust-modal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('cust-modal').style.display = 'none';
 }
 
 async function loadDebts() {
