@@ -1,4 +1,4 @@
-import { pool } from "../db/connection.ts";
+import { pool } from "../database/connection.ts";
 
 export type UserRow = {
   id: number;

@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "npm:fastify";
-import { sql } from "../../../infrastructure/db/connection.ts";
+import { sql } from "../../../infrastructure/database/connection.ts";
 
 function generateSchedule(principalCents: number, annualRateBps: number, termMonths: number) {
   const monthlyRate = annualRateBps / 100 / 100 / 12;
