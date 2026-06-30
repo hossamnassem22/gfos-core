@@ -436,7 +436,7 @@ function renderCustomers(rows) {
         const overdueCell = hasOverdue
           ? '<span style="color:var(--danger);font-weight:700">' + fmt(r.overdue_amount_cents) + '</span>'
           : '<span style="color:var(--success)">لا شيء</span>';
-        return '<tr><td><strong>' + r.name + '</strong></td><td>' + r.phone + '</td><td>' + r.debt_count + '</td><td>' + fmt(r.total_principal_cents) + '</td><td>' + overdueCell + '</td><td>' + badge + '</td><td><button class="btn btn-sm btn-primary" onclick="viewCustomer(\'' + r.id + '\')">كشف حساب</button></td></tr>';
+        return '<tr><td><strong>' + r.name + '</strong></td><td>' + r.phone + '</td><td>' + r.debt_count + '</td><td>' + fmt(r.total_principal_cents) + '</td><td>' + overdueCell + '</td><td>' + badge + '</td><td><button class="btn btn-sm btn-primary" data-id="' + r.id + '" onclick="viewCustomer(this.dataset.id)">كشف حساب</button></td></tr>';
       }).join('')
     : '<tr><td colspan="7" style="text-align:center;color:var(--text2);padding:30px">لا يوجد عملاء</td></tr>';
 }
