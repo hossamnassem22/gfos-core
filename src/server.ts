@@ -20,8 +20,17 @@ export async function handler(req: Request): Promise<Response> {
       const payload = await req.json();
       if (!payload.name) return jsonResponse({ error: "name required" }, 400);
       const id = crypto.randomUUID();
-      // TODO: persist to Postgres via repository
-      return jsonResponse({ id, ...payload }, 201);
+
+      // Lazy-import repository so tests that only import handler don't require DATABASE_URL
+      try {
+        const { createCustomer } = await import("./db/customerRepository.ts");
+        const created = await createCustomer({ name: payload.name, email: payload.email, phone: payload.phone });
+        return jsonResponse(created, 201);
+      } catch (err) {
+        // If DB not configured, fall back to in-memory response but indicate non-persistence
+        console.error("DB error or not configured:", err.message);
+        return jsonResponse({ id, ...payload, persisted: false }, 201);
+      }
     } catch (err) {
       return jsonResponse({ error: "invalid json" }, 400);
     }
