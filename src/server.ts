@@ -23,7 +23,8 @@ export async function handler(req: Request): Promise<Response> {
 
       // Lazy-import repository so tests that only import handler don't require DATABASE_URL
       try {
-        const { createCustomer } = await import("./src/db/customerRepository.ts");
+        // fixed path: server.ts is inside src/, so repository is at ./db/* relative to this file
+        const { createCustomer } = await import("./db/customerRepository.ts");
         const created = await createCustomer({ name: payload.name, email: payload.email, phone: payload.phone });
         return jsonResponse(created, 201);
       } catch (err) {
