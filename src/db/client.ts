@@ -8,7 +8,7 @@ if (DATABASE_URL) {
   pool = new Pool(DATABASE_URL, 3, true);
 }
 
-export async function queryObject(text: string, params: Array<unknown> = []) {
+export async function queryObject(text: string, params: Array<unknown> = []): Promise<any> {
   if (!pool) {
     throw new Error(
       "DATABASE_URL is not configured. Set the DATABASE_URL environment variable or Actions secret to run DB operations."
