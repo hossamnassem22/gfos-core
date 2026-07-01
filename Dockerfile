@@ -1,13 +1,24 @@
-FROM denoland/deno:1.46.0
+FROM denoland/deno:latest
 
 WORKDIR /app
 
-COPY . .
+# Copy deno.json and deno.lock for dependency caching
+COPY deno.json deno.lock* ./
 
-ENV DENO_ENV=production
+# Cache dependencies
+RUN deno cache --reload src/server.ts
 
-RUN deno cache src/main.ts
+# Copy source code
+COPY src ./src
+COPY scripts ./scripts
+COPY tests ./tests
 
+# Expose port
 EXPOSE 3000
 
-CMD ["run", "--allow-net", "--allow-env", "--allow-read", "src/main.ts"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD deno run --allow-net https://deno.land/std@0.177.0/http/file_server.ts --check http://localhost:3000/health || exit 1
+
+# Run the server
+CMD ["deno", "run", "--allow-net", "--allow-read", "src/server.ts"]
