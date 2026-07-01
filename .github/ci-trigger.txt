@@ -1,0 +1,3 @@
+CI rerun trigger file
+
+This file was committed by GitHub Copilot to trigger CI re-runs after automated fixes.
