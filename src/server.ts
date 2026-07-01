@@ -23,7 +23,7 @@ export async function handler(req: Request): Promise<Response> {
 
       // Lazy-import repository so tests that only import handler don't require DATABASE_URL
       try {
-        const { createCustomer } = await import("./src/db/customerRepository.ts");
+        const { createCustomer } = await import("./db/customerRepository.ts");
         const created = await createCustomer({ name: payload.name, email: payload.email, phone: payload.phone });
         return jsonResponse(created, 201);
       } catch (err) {
@@ -33,6 +33,27 @@ export async function handler(req: Request): Promise<Response> {
       }
     } catch (err) {
       return jsonResponse({ error: "invalid json" }, 400);
+    }
+  }
+
+  // Auth routes
+  if (url.pathname === "/api/auth/register" && req.method === "POST") {
+    try {
+      const { registerHandler } = await import("./controllers/auth.ts");
+      return await registerHandler(req);
+    } catch (err) {
+      console.error("auth register error:", err);
+      return jsonResponse({ error: "internal" }, 500);
+    }
+  }
+
+  if (url.pathname === "/api/auth/login" && req.method === "POST") {
+    try {
+      const { loginHandler } = await import("./controllers/auth.ts");
+      return await loginHandler(req);
+    } catch (err) {
+      console.error("auth login error:", err);
+      return jsonResponse({ error: "internal" }, 500);
     }
   }
 
