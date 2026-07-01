@@ -20,4 +20,5 @@ jobs:
         run: deno run --allow-read --allow-env scripts/architecture/engine.ts
 
       - name: Type Check
-        run: deno check src/main.ts
+        # project uses src/server.ts as the runtime entrypoint; adjust type-check accordingly
+        run: deno check src/server.ts
